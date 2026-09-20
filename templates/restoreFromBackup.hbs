@@ -1,0 +1,18 @@
+<form style="position: relative;">
+    <div class="form-group">
+        <span class="aps-span">{{localize "visual-novel-reverse.restoreFromBackup.header"}}</span>
+        <div class="form-fields">
+            <button type="button" class="rfb-file-picker" style="order: 99;" title="{{localize "visual-novel-reverse.restoreFromBackup.button"}}">
+                <i class="fas fa-file-import fa-fw"></i>
+            </button>
+            <input class="rfb-choose-file" type="text" placeholder="settingsBackups/..." value="">
+        </div>
+    </div>
+    <div class="form-fields" style="margin-top: 5px; margin-bottom: 5px;">
+        <span class="aps-span">{{localize "visual-novel-reverse.restoreFromBackup.makeNewBackup"}}</span>
+        <input class="rfb-create-backup" type="checkbox">
+    </div>
+    <div class="form-group">
+        <button type="submit" class="rfb-submit-button">{{localize "visual-novel-reverse.restoreFromBackup.confirm"}}</button>
+    </div>
+</form>

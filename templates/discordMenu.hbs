@@ -1,0 +1,83 @@
+<div class="discord-settings-menu">
+    <div class="dsm-header flexrow">
+        <div class="dsm-title">{{localize "visual-novel-reverse.discordMenu.title"}}</div>
+    </div>
+
+    <div class="dsm-body">
+        {{!-- Состояние подключения и кнопка --}}
+        <div class="dsm-connection-status flexrow">
+            <div class="dsm-status {{#if isConnected}}connected{{/if}}">
+                <i class="fas {{#if isConnected}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
+                <span>{{#if isConnected}}{{localize "visual-novel-reverse.discordMenu.statusConnected"}}{{else}}{{localize "visual-novel-reverse.discordMenu.statusDisconnected"}}{{/if}}</span>
+            </div>
+            <button class="dsm-connect-button" {{#if isConnected}}disabled{{/if}} data-action="connect">
+                <i class="fab fa-discord"></i>
+                <span>{{#if isConnected}}{{localize "visual-novel-reverse.discordMenu.buttonDisconnect"}}{{else}}{{localize "visual-novel-reverse.discordMenu.buttonConnect"}}{{/if}}</span>
+            </button>
+        </div>
+
+        {{!-- Список пользователей в войсе --}}
+        <div class="dsm-voice-users">
+            <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.voiceUsers"}}</div>
+            <div class="dsm-users-list">
+                {{#each voiceUsers}}
+                <div class="dsm-user-item flexrow">
+                    <img src="{{this.avatar}}" class="dsm-user-avatar" />
+                    <span class="dsm-user-name">{{this.name}}</span>
+                    <div class="dsm-user-status">
+                        {{#if this.isMuted}}<i class="fas fa-microphone-slash"></i>{{/if}}
+                        {{#if this.isDeafened}}<i class="fas fa-volume-xmark"></i>{{/if}}
+                        {{#if this.isSpeaking}}<i class="fas fa-volume-high"></i>{{/if}}
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+
+        {{!-- Настройки интеграции --}}
+        <div class="dsm-settings">
+            <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.settings"}}</div>
+            
+            <div class="dsm-setting-item">
+                <label>{{localize "visual-novel-reverse.discordMenu.channelId"}}</label>
+                <input type="text" name="channelId" value="{{settings.channelId}}" data-action="updateChannelId" />
+            </div>
+
+            <div class="dsm-setting-item">
+                <label>{{localize "visual-novel-reverse.discordMenu.userId"}}</label>
+                <input type="text" name="userId" value="{{settings.userId}}" data-action="updateUserId" />
+            </div>
+
+            <div class="dsm-setting-item">
+                <label>
+                    <input type="checkbox" name="notifyVoiceStatus" {{#if settings.notifyVoiceStatus}}checked{{/if}} data-action="updateNotifications" />
+                    <span>{{localize "visual-novel-reverse.discordMenu.notifyVoiceStatus"}}</span>
+                </label>
+            </div>
+
+            <div class="dsm-setting-item">
+                <label>
+                    <input type="checkbox" name="syncPortraits" {{#if settings.syncPortraits}}checked{{/if}} data-action="updateActivitySync" />
+                    <span>{{localize "visual-novel-reverse.discordMenu.syncPortraits"}}</span>
+                </label>
+            </div>
+
+            <div class="dsm-setting-item">
+                <label>
+                    <input type="checkbox" name="autoConnect" {{#if settings.autoConnect}}checked{{/if}} data-action="updateAutoConnect" />
+                    <span>{{localize "visual-novel-reverse.discordMenu.autoConnect"}}</span>
+                </label>
+            </div>
+        </div>
+
+        {{!-- Гайд --}}
+        <div class="dsm-guide">
+            <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.guide"}}</div>
+            <div class="dsm-guide-content">
+                <p>{{localize "visual-novel-reverse.discordMenu.guideText1"}}</p>
+                <p>{{localize "visual-novel-reverse.discordMenu.guideText2"}}</p>
+                <p>{{localize "visual-novel-reverse.discordMenu.guideText3"}}</p>
+            </div>
+        </div>
+    </div>
+</div>

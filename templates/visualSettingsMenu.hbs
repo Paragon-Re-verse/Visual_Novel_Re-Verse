@@ -1,0 +1,438 @@
+<div class="visual-settings-menu"{{#if (eq showMode "detailUI")}} style="background-color: #313338;"{{/if}}>
+    {{!-- Главное меню --}}
+    {{#if (eq showMode "home")}}
+        <div class="vsm-main-menu-body">
+            <div class="vsm-menu-button" data-mode="menuUI"><i class="fas fa-object-group"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.uiMenuButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="menuAutoPortraits"><i class="fas fa-image-portrait"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.autoPortraitsButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="wipButton"><i class="fas fa-keyboard"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.wipButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="menuEffects"><i class="fas fa-wand-sparkles"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.effectsSettingsButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="menuVisual"><i class="fas fa-paintbrush"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.visSettingsButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="menuTech"><i class="fas fa-wrench"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.techSettingsButton"}}</span></div>
+            <div class="vsm-menu-button" data-mode="menuModules"><i class="fas fa-cube"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.modulesButton"}}</span></div>
+        </div>
+    {{!-- Меню настройки UI --}}
+    {{else if (eq showMode "menuUI")}}
+        <div class="vsm-UI-menu-body">
+            <div class="vsm-header flexrow">
+                <div class="vsm-toMenu-button flexrow vsm-left"><i class="fas fa-arrow-left"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.toMenuButton"}}</span></div>
+                <span class="vsm-hint-title">{{localize "visual-novel-reverse.visualSettingsMenu.headerTitle"}}</span>
+                <span class="vsm-hint">{{localize "visual-novel-reverse.visualSettingsMenu.hintPlaceholder"}}</span>
+            </div>
+
+            <div class="vsm-body flexrow">
+                <div class="vsm-UI-container">
+                    <div class="vsm-UI">
+
+                        {{!-- Кнопки --}}
+                        <div class="vsm-buttons">
+                            {{#each buttons as |button|}}
+                                <div class="vsm-button-box" data-key="{{button.key}}" style="{{button.style}}" data-tooltip="{{button.tooltip}}"><i class="fas fa-{{button.icon}}"></i></div>
+                            {{/each}}
+                        </div>
+
+                        {{!-- Заголовок --}}
+                        <div class="vsm-UI-header-container">
+                            <div class="vsm-UI-header flexrow vsm-move-headerSlider" style="left: {{offset.headerSliderX}}%; top: {{offset.headerSliderY}}%;">
+                                {{#each headerSliderEls}}
+                                <div class="vsm-{{key}}" style="flex: {{flex}}">
+                                    {{#if span}}<span>{{span}}</span>{{/if}}
+                                    {{#if i}}<i class="{{i}}"></i>{{/if}}
+                                    <div class="vsm-checkbox vsm-up vsm-dashed">
+                                        <input type="checkbox" data-key="activeElements.{{key}}" {{#if active}}checked{{/if}}>
+                                        <i class="fas fa-{{icon}}"></i>
+                                    </div>
+                                </div>
+                                {{/each}}
+                                <div class="vsm-checkbox vsm-left vsm-main"><input type="checkbox" data-key="activeElements.headerSlider" {{#if activeElements.headerSlider}}checked{{/if}}></div>
+                            </div>
+                        </div>
+
+                        {{!-- Левый слайдер --}}
+                        <div class="vsm-slider vsm-left vsm-move-leftSlider" style="left: {{offset.leftSliderX}}%; top: {{offset.leftSliderY}}%;">
+                            {{!-- Изображения слайдера (фон и верхняя часть ) --}}
+                            <div class="vsm-slider-img vsm-left">
+                                <div class="vsm-checkbox vsm-down vsm-main" style="left: 5%"><input type="checkbox" data-key="activeElements.leftSlider" {{#if activeElements.leftSlider}}checked{{/if}}></div>
+                            </div>
+                            {{!-- Портреты в левой части --}}
+                            <div class="vsm-portraits vsm-right" class="flexrow">
+                                {{!-- Линия от слотов до поля ввода --}}
+                                <div class="vsm-slots-line" style="width: calc({{data.lineWidth.left}}% - 20px);"></div>
+                                {{!-- Количество слотов --}}
+                                <div class="vsm-slots">
+                                    <input class="vsm-slots-input" type="text" data-key="slotCount.left" value="{{slotCount.left}}" placeholder="{{data.slotCountPlaceholder}}"/>
+                                </div>
+                                <div class="vsm-portraits-container flexrow">
+                                    {{#each pFields.left as |pField|}}
+                                        <div class="vsm-pField-content vsm-line-{{pField.lineSide}}">
+                                            {{!-- Пустой контейнер (отображаемый контур псевдо-контейнера портрета для перетягивания нового актёра) --}}
+                                            <div class="vsm-pField vsm-left" data-key="left">
+                                                <div class="vsm-pField-arrow vsm-down{{#if pField.active}} vsm-active{{/if}}" data-pos="{{pField.key}}" data-key="masterSlot.left"></div>
+                                                {{#if @last}}<div class="vsm-pField-arrow vsm-right{{#if pField.last}} vsm-active{{/if}}" data-pos="Last" data-key="masterSlot.leftLast"></div>{{/if}}
+                                            </div>
+                                        </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                            {{!-- Текст слайдера --}}
+                            <div class="vsm-text-box vsm-left flexcol">
+                                <div class="vsm-text-container">
+                                    {{!-- Имя --}}
+                                    <div class="vsm-name-container flexrow">
+                                        <div class="flex0" style="border-right: 2px dashed"><input type="checkbox" data-key="activeElements.leftName" {{#if activeElements.leftName}}checked{{/if}}></div>
+                                        <span class="vsm-name">{{localize "visual-novel-reverse.visualSettingsMenu.name"}}</span>
+                                    </div>
+                                    {{!-- Титул/звание/т.п. --}}
+                                    <div class="vsm-title-container flexrow">
+                                        <div class="flex0" style="border-right: 2px dashed"><input type="checkbox" data-key="activeElements.leftTitle" {{#if activeElements.leftTitle}}checked{{/if}}></div>
+                                        <span class="vsm-title">{{localize "visual-novel-reverse.visualSettingsMenu.title"}}</span>
+                                    </div>
+                                    {{!-- <div class="vsm-checkbox vsm-left vsm-main"><input type="checkbox" data-key="activeElements.leftNameBox" {{#if activeElements.leftNameBox}}checked{{/if}}></div> --}}
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        {{!-- Правый слайдер --}}
+                        <div class="vsm-slider vsm-right vsm-move-rightSlider" style="right: {{offset.rightSliderX}}%; top: {{offset.rightSliderY}}%;">
+                            {{!-- Изображения слайдера (фон и верхняя часть ) --}}
+                            <div class="vsm-slider-img vsm-right">
+                                <div class="vsm-checkbox vsm-down vsm-main" style="right: 5%"><input type="checkbox" data-key="activeElements.rightSlider" {{#if activeElements.rightSlider}}checked{{/if}}></div>
+                            </div>
+                            {{!-- Портреты в левой части --}}
+                            <div class="vsm-portraits vsm-right" class="flexrow">
+                                {{!-- Линия от слотов до поля ввода --}}
+                                <div class="vsm-slots-line" style="width: calc({{data.lineWidth.right}}% - 20px);"></div>
+                                {{!-- Количество слотов --}}
+                                <div class="vsm-slots">
+                                    <input class="vsm-slots-input" type="text" data-key="slotCount.right" value="{{slotCount.right}}" placeholder="{{data.slotCountPlaceholder}}"/>
+                                </div>
+                                <div class="vsm-portraits-container flexrow">
+                                    {{#each pFields.right as |pField|}}
+                                        <div class="vsm-pField-content vsm-line-{{pField.lineSide}}">
+                                            {{!-- Пустой контейнер (отображаемый контур псевдо-контейнера портрета для перетягивания нового актёра) --}}
+                                            <div class="vsm-pField vsm-right" data-key="right">
+                                                {{#if @first}}<div class="vsm-pField-arrow vsm-left{{#if pField.last}} vsm-active{{/if}}" data-pos="Last" data-key="masterSlot.rightLast"></div>{{/if}}
+                                                <div class="vsm-pField-arrow vsm-down{{#if pField.active}} vsm-active{{/if}}" data-pos="{{pField.key}}" data-key="masterSlot.right"></div>
+                                            </div>
+                                        </div>
+                                    {{/each}}
+                                </div>
+                            </div>
+                            {{!-- Текст слайдера --}}
+                            <div class="vsm-text-box vsm-right flexcol">
+                                <div class="vsm-text-container">
+                                    {{!-- Имя --}}
+                                    <div class="vsm-name-container flexrow">
+                                        <span class="vsm-name">{{localize "visual-novel-reverse.visualSettingsMenu.name"}}</span>
+                                        <div class="flex0" style="border-left: 2px dashed"><input type="checkbox" data-key="activeElements.rightName" {{#if activeElements.rightName}}checked{{/if}}></div>
+                                    </div>
+                                    {{!-- Титул/звание/т.п. --}}
+                                    <div class="vsm-title-container flexrow">
+                                        <span class="vsm-title">{{localize "visual-novel-reverse.visualSettingsMenu.title"}}</span>
+                                        <div class="flex0" style="border-left: 2px dashed"><input type="checkbox" data-key="activeElements.rightTitle" {{#if activeElements.rightTitle}}checked{{/if}}></div>
+                                    </div>
+                                    {{!-- <div class="vsm-checkbox vsm-right vsm-main"><input type="checkbox" data-key="activeElements.rightNameBox" {{#if activeElements.rightNameBox}}checked{{/if}}></div> --}}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="vsm-ui-save-button flexrow vsm-hidden">
+                        <i class="fas fa-save"></i>
+                        <span>{{localize "visual-novel-reverse.visualSettingsMenu.uiSaveButton"}}</span>
+                    </div>
+                    <div class="vsm-buttom-button" data-app="detailUI">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.openButton"}}</div>
+                    {{!-- <div class="vsm-buttom-button" style="right: calc(50% + 15px)" data-app="detailUI">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.openButton"}}</div> --}}
+                    {{!-- <div class="vsm-buttom-button" style="left: calc(50% + 15px)" data-app="buttonsCustomizer">{{localize "visual-novel-reverse.buttonsCustomizer.openButton"}}</div> --}}
+                </div>
+                <div class="vsm-preset-list">
+                    {{!-- Активный пресет --}}
+                    <div class="vsm-preset vsm-preset-active{{#if (eq data.editblePresetId data.activePreset.id)}} vsm-preset-editing{{/if}}" data-id="{{data.activePreset.id}}">
+                        <input class="vsm-preset-input" type="text" value="{{data.activePreset.name}}" style="border-radius: 5px"/>
+                        <div class="vsm-bottom-buttons">
+                            {{#if (eq data.editblePresetId data.activePreset.id)}}
+                                <div class="vsm-preset-save" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.savePresetTooltip"}}">{{localize "visual-novel-reverse.visualSettingsMenu.saveChanges"}}</div>
+                            {{else}}
+                                <div class="vsm-preset-edit" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.editButtonTooltip"}}">{{localize "visual-novel-reverse.visualSettingsMenu.editButton"}}</div>
+                            {{/if}}
+                        </div>
+                        <div class="vsm-corner-buttons">
+                            <div class="vsm-preset-import" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetImportTooltip"}}"><i class="fas fa-copy"></i></div>
+                            <div class="vsm-preset-export" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetExportTooltip"}}"><i class="fas fa-paste"></i></div>
+                            <div class="vsm-preset-delete" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetDeleteTooltip"}}"><i class="fas fa-trash"></i></div>
+                        </div>
+                    </div>
+                    <div class="vsm-presets-container">
+                        {{#each presets as |preset|}}
+                            <div class="vsm-preset{{#if (eq ../data.editblePresetId preset.id)}} vsm-preset-editing{{/if}}" data-id="{{preset.id}}">
+                                <input class="vsm-preset-input" type="text" value="{{preset.name}}" style="border-radius: 5px"/>
+                                <div class="vsm-bottom-buttons">
+                                    <div class="vsm-preset-activate">{{localize "visual-novel-reverse.visualSettingsMenu.activateButton"}}</div>
+                                    {{#if (eq ../data.editblePresetId preset.id)}}
+                                        <div class="vsm-preset-save" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.savePresetTooltip"}}">{{localize "visual-novel-reverse.visualSettingsMenu.savePreset"}}</div>
+                                    {{else}}
+                                        <div class="vsm-preset-edit" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.editButtonTooltip"}}">{{localize "visual-novel-reverse.visualSettingsMenu.editButton"}}</div>
+                                    {{/if}}
+                                </div>
+                                <div class="vsm-corner-buttons">
+                                    <div class="vsm-preset-import" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetImportTooltip"}}"><i class="fas fa-copy"></i></div>
+                                    <div class="vsm-preset-export" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetExportTooltip"}}"><i class="fas fa-paste"></i></div>
+                                    <div class="vsm-preset-delete" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.presetDeleteTooltip"}}"><i class="fas fa-trash"></i></div>
+                                </div>
+                            </div>
+                        {{/each}}
+                    </div>
+                    <div class="vsm-filler"></div>
+                    <div class="vsm-add-preset"><i class="fas fa-plus"></i></div>
+                </div>
+            </div>
+        </div>
+    {{!-- Меню детальной настройки UI --}}
+    {{else if (eq showMode "detailUI")}}
+        <div class="vsm-detailUI-body">
+            <div class="vsm-detail-mode-selector flexrow">
+                {{!-- {{#each data.detailModeBuffer.modes as |mode|}}
+                <div class="vsm-detail-mode" data-mode="{{mode}}">{{localize (concat "visual-novel-reverse.visualSettingsMenu.detailMode." mode)}}</div>
+                {{/each}} --}}
+                <div class="vsm-detail-mode" data-mode="moveSliders">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.moveSliders"}}</div>
+                <div class="vsm-detail-mode" data-mode="none">WIP (again, yea)</div>
+
+                <div class="vsm-detail-mode-slider {{data.detailModeBuffer.mode}}"></div>
+            </div>
+            <p>{{localize (concat "visual-novel-reverse.visualSettingsMenu.detailMode.hint" data.detailModeBuffer.mode)}}</p>
+            <div class="flexrow vsm-checkbox-container">
+                <div class="form-fields">
+                    <input id="vsm-hideApps" type="checkbox" name="hideApps" {{#if data.detailModeBuffer.hideApps}}checked{{/if}}>
+                    <label for="vsm-hideApps">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.hideApps"}}</label>
+                </div>
+                {{!-- <div class="form-fields">
+                    <input id="vsm-cellRuler" type="checkbox" name="cellRuler" {{#if data.detailModeBuffer.cellRuler}}checked{{/if}}>
+                    <label for="vsm-cellRuler">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.cellRuler"}}</label>
+                </div> --}}
+            </div>
+            <div class="vsm-detailUI-buttons">
+                <button class="vsm-detailUI-save-button" id="vsm-detailUI-save"><i class="fas fa-save"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.save"}}</span></button>
+                <button class="vsm-detailUI-cancel-button"><i class="fas fa-times"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.cancel"}}</span></button>
+                <button class="vsm-detailUI-close-button"><i class="fas fa-reply"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.exit"}}</span></button>
+            </div>
+        </div>
+    {{!-- Меню настройки автосоздания портретов --}}
+    {{else if (eq showMode "menuAutoPortraits")}}
+        {{#if isMenuTab}}
+            <div class="vsm-header flexrow">
+                <div class="vsm-toMenu-button flexrow vsm-left"><i class="fas fa-arrow-left"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.toMenuButton"}}</span></div>
+                <span class="vsm-hint">{{localize "visual-novel-reverse.visualSettingsMenu.autoPortraitsHint"}}</span>
+                <div class="vsm-miniGuide-button" data-tooltip="{{localize "visual-novel-reverse.dialogues.portraitAutoMakerGuideTitle"}}"><i class="fas fa-question-circle"></i></div>
+                <div class="vsm-hiddenTypes-button" data-tooltip="{{localize "visual-novel-reverse.visualSettingsMenu.autoPortraitsHiddenTypesTooltip"}}"><i class="fas fa-gear"></i></div>
+            </div>
+        {{/if}}
+        <div class="pms-tabs-box">
+            <div class="pms-tabs">
+                <div class="pms-tabs-selector">
+                    {{#each settingsTab as |tab|}}
+                        <a class="pms-tab-button{{#if (eq ../data.currentTab tab.name)}} pms-choosed{{/if}}" data-tab="{{tab.name}}">{{localize (concat "TYPES.Actor." tab.name)}}</a>
+                    {{/each}}
+                    <div class="pms-multiCreate-button">
+                        <i class="fas fa-clone"></i>
+                        <span>{{localize "visual-novel-reverse.portraitsMaker.multiCreateButton"}}</span>
+                    </div>
+                </div>
+            </div>
+            {{#each settingsTab as |tab|}}
+                <div class="pms-tab{{#unless (eq ../data.currentTab tab.name)}} pms-hidden{{/unless}}" data-tab="{{tab.name}}">
+                    {{!-- Выбор одного из вариантов --}}
+                    <div class="pms-header">
+                        <div class="pms-general-rules flexcol">
+                            <div class="pms-header-container">
+                                <div class="pms-header-box">
+                                    <div class="pms-header-text"><h4>{{localize "visual-novel-reverse.portraitsMaker.portraitAutoCreationRule"}}</h4></div>
+                                    <div class="pms-header-buttons flexrow" data-key="portraitAutoCreationRule">
+                                        <div data-value="openSheet" class="pms-selector-box{{#if (eq autoSearchData.generalRules.portraitAutoCreationRule "openSheet")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.openSheet"}}</span>
+                                        </div>
+                                        <div data-value="actorCreateOrChange" class="pms-selector-box{{#if (eq autoSearchData.generalRules.portraitAutoCreationRule "actorCreateOrChange")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.actorCreateOrChange"}}</span>
+                                        </div>
+                                        <div data-value="manuallyOnly" class="pms-selector-box{{#if (eq autoSearchData.generalRules.portraitAutoCreationRule "manuallyOnly")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.manuallyOnly"}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="flex0" style="width: 100%;">
+                            <div class="pms-header-container">
+                                <div class="pms-header-box">
+                                    <div class="pms-header-text"><h4>{{localize "visual-novel-reverse.portraitsMaker.useImageHeader"}}</h4></div>
+                                    <div class="pms-header-buttons flexrow" data-key="useImage">
+                                        <div data-value="tokenImage" class="pms-selector-box{{#if (eq autoSearchData.generalRules.useImage "tokenImage")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.tokenImage"}}</span>
+                                        </div>
+                                        <div data-value="actorImage" class="pms-selector-box{{#if (eq autoSearchData.generalRules.useImage "actorImage")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.actorImage"}}</span>
+                                        </div>
+                                        <div data-value="searchImage" class="pms-selector-box{{#if (eq autoSearchData.generalRules.useImage "searchImage")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.searchImage"}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="pms-header-container">
+                                <div class="pms-header-box">
+                                    <div class="pms-header-text"><h4>{{localize "visual-novel-reverse.portraitsMaker.afterRuleHeader"}}</h4></div>
+                                    <div class="pms-header-buttons flexrow" data-key="afterRule">
+                                        <div data-value="dontMakePort" class="pms-selector-box{{#if (eq autoSearchData.generalRules.afterRule "dontMakePort")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.dontMakePort"}}</span>
+                                        </div>
+                                        <div data-value="useTokenImage" class="pms-selector-box{{#if (eq autoSearchData.generalRules.afterRule "useTokenImage")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.useTokenImage"}}</span>
+                                        </div>
+                                        <div data-value="useActorImage" class="pms-selector-box{{#if (eq autoSearchData.generalRules.afterRule "useActorImage")}} pms-choosed{{/if}}">
+                                            <span>{{localize "visual-novel-reverse.portraitsMaker.useActorImage"}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pms-header-settings">
+                            <div {{#if (and ../data.useChosenGroupSettings (ne tab.name ../data.useChosenGroupSettings))}}class="pms-setting-group pms-locked" data-tooltip="{{localize "visual-novel-reverse.portraitsMaker.useThisGroupForAllDisabled"}}"{{else}}class="pms-setting-group"{{/if}}>
+                                <input type="checkbox" data-key="useThisGroupForAll" {{#if ../data.useChosenGroupSettings}} {{#if (eq tab.name ../data.useChosenGroupSettings)}}checked{{else}}disabled{{/if}} {{/if}}>
+                                <span>{{localize "visual-novel-reverse.portraitsMaker.useThisGroupForAll"}}</span>
+                            </div>
+                            <hr>
+                            <h4>{{localize "visual-novel-reverse.portraitsMaker.chosenGroup"}}</h4>
+                            <select data-key="selectedGroup">
+                                {{#each ../settingsTab as |group|}}
+                                    {{#unless (eq ../data.currentTab group.name)}}
+                                        <option value="{{group.name}}" {{#if (eq autoSearchData.generalRules.chosenGroup group.name)}}selected{{/if}}>{{localize (concat "TYPES.Actor." group.name)}}</option>
+                                    {{/unless}}
+                                {{/each}}
+                            </select>
+                            <div class="pms-setting-group">
+                                <input type="checkbox" data-key="useChosenGroupSettings" {{#if autoSearchData.generalRules.useChosenGroupSettings}}checked{{/if}}>
+                                <span>{{localize "visual-novel-reverse.portraitsMaker.useChosenGroupSettings"}}</span>
+                            </div>
+                            <div class="pms-setting-button" data-key="copyChosenGroup">
+                                <i class="fas fa-copy"></i>
+                                <span>{{localize "visual-novel-reverse.portraitsMaker.copyChosenGroup"}}</span>
+                            </div>
+                            <div class="pms-setting-button" data-key="addVariant">
+                                <i class="fas fa-plus"></i>
+                                <span>{{localize "visual-novel-reverse.portraitsMaker.addVariant"}}</span>
+                            </div>
+                            <div class="pms-setting-button" data-key="clearVariants">
+                                <i class="fas fa-trash"></i>
+                                <span>{{localize "visual-novel-reverse.portraitsMaker.clearVariants"}}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {{!-- Автопоиск изображения --}}
+                    <div class="pms-autoSearch-settings">
+                        <div class="pms-autoSearch-header">
+                            <span class="pms-autoSearch-title">{{localize "visual-novel-reverse.portraitsMaker.headerFilePath"}}</span>
+                            <span class="pms-autoSearch-title">{{localize "visual-novel-reverse.portraitsMaker.headerFileName"}}</span>
+                            <span class="pms-autoSearch-title">{{localize "visual-novel-reverse.portraitsMaker.headerFileType"}}</span>
+                        </div>
+                        <div class="pms-autoSearch-list">
+                            {{#each autoSearchData.searchConditions as |item|}}
+                                <div class="pms-autoSearch-item flexrow{{#unless item.active}} pms-inactive{{/unless}}" data-index="{{@index}}">
+                                    <div class="pms-autoSearch-item-moveButtons">
+                                        <div class="pms-autoSearch-item-move" data-key="up"><i class="fa-solid fa-caret-up"></i></div>
+                                        <div class="pms-autoSearch-item-move" data-key="down"><i class="fa-solid fa-caret-down"></i></div>
+                                    </div>
+                                    <div class="pms-autoSearch-item-boxPart">
+                                        <select name="filePlace" data-index="{{@index}}" data-dtype="String">
+                                            <option value="defaultFolder" {{#if (eq item.filePlace "defaultFolder")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.defaultFolder"}}</option>
+                                            <option value="tokenImageFolder" {{#if (eq item.filePlace "tokenImageFolder")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.tokenImageFolder"}}</option>
+                                            <option value="actorImageFolder" {{#if (eq item.filePlace "actorImageFolder")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.actorImageFolder"}}</option>
+                                            {{!-- <option value="foundryEverywhere" {{#if (eq item.filePlace "foundryEverywhere")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.foundryEverywhere"}}</option> --}}
+                                            <option value="folderOnPathEverywhere" {{#if (eq item.filePlace "folderOnPathEverywhere")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.folderOnPathEverywhere"}}</option>
+                                            <option value="folderOnPath" {{#if (eq item.filePlace "folderOnPath")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.folderOnPath"}}</option>
+                                        </select>
+                                        <input type="text" data-key="folderPath" {{#if (eq item.filePlace "folderOnPath")}}value="{{item.folderPath}}"{{else}}disabled{{/if}} placeholder="{{#if (or (eq item.filePlace "folderOnPathEverywhere") (eq item.filePlace "folderOnPath"))}}{{../../data.portraitFoldersPath}}{{else}}{{localize "visual-novel-reverse.portraitsMaker.folderPathPlaceholder"}}{{/if}}">
+                                        <i class="fa-solid fa-arrow-right pms-autoSearch-item-arrow"></i>
+                                    </div>
+                                    <div class="pms-autoSearch-item-boxPart">
+                                        <select name="nameCompare" data-index="{{@index}}" data-dtype="String">
+                                            <option value="equals" {{#if (eq item.nameCompare "equals")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.equals"}}</option>
+                                            <option value="nameInInput" {{#if (eq item.nameCompare "nameInInput")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.nameInInput"}}</option>
+                                            <option value="inputInName" {{#if (eq item.nameCompare "inputInName")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.inputInName"}}</option>
+                                        </select>
+                                        <input type="text" data-key="fileName" value="{{item.fileName}}" placeholder="{{localize "visual-novel-reverse.portraitsMaker.fileNamePlaceholder"}}">
+                                        <i class="fa-solid fa-arrow-right pms-autoSearch-item-arrow"></i>
+                                    </div>
+                                    <div class="pms-autoSearch-item-boxPart">
+                                        <select name="chosenExt" data-index="{{@index}}" data-dtype="String">
+                                            <option value="any" {{#if (eq item.chosenExt "any")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.any"}}</option>
+                                            <option value="extInField" {{#if (eq item.chosenExt "extInField")}}selected{{/if}}>{{localize "visual-novel-reverse.portraitsMaker.extInField"}}</option>
+                                        </select>
+                                        <input type="text" data-key="customExtension" {{#if (eq item.chosenExt "extInField")}}value="{{item.customExtension}}"{{else}}disabled{{/if}} placeholder="{{localize "visual-novel-reverse.portraitsMaker.customExtension"}}">
+                                    </div>
+                                    <div class="pms-asi-cornerButtons" data-index="{{@index}}">
+                                        {{#if item.active}}
+                                            <div class="pms-autoSearch-item-sideButton" data-key="activeSwitch" data-tooltip="{{localize "visual-novel-reverse.portraitsMaker.activeSwitchButtonOff"}}"><i class="fa-solid fa-circle-check"></i></div>
+                                        {{else}}
+                                            <div class="pms-autoSearch-item-sideButton" data-key="activeSwitch" data-tooltip="{{localize "visual-novel-reverse.portraitsMaker.activeSwitchButtonOn"}}"><i class="fa-solid fa-circle-xmark"></i></div>
+                                        {{/if}}
+                                        <div class="pms-autoSearch-item-sideButton" data-key="copy" data-tooltip="{{localize "visual-novel-reverse.portraitsMaker.copyButton"}}"><i class="fa-solid fa-copy"></i></div>
+                                        <div class="pms-autoSearch-item-sideButton" data-key="delete" data-tooltip="{{localize "visual-novel-reverse.portraitsMaker.deleteButton"}}"><i class="fa-solid fa-trash"></i></div>
+                                    </div>
+                                </div>
+                            {{/each}}
+                        </div>
+                    </div>
+                </div>
+            {{/each}}
+        </div>
+    {{else}}
+        {{!-- Меню настроек --}}
+        <form class="vsm-settings-list-body">
+            <div class="vsm-setting-list-header flexrow">
+                <div class="vsm-toMenu-button flexrow vsm-left"><i class="fas fa-arrow-left"></i><span>{{localize "visual-novel-reverse.visualSettingsMenu.toMenuButton"}}</span></div>
+                <span class="vsm-settings-menu-hint">{{localize "visual-novel-reverse.visualSettingsMenu.settingsMenuHint"}}</span>
+                <div class="vsm-save-button flexrow vsm-right"><span>{{localize "visual-novel-reverse.visualSettingsMenu.saveButton"}}</span><i class="fas fa-save"></i></div>
+            </div>
+            <div class="vsm-settings-list">
+                {{#each settings as |setting|}}
+                    <div class="form-group vsm-setting-container"data-type="{{setting.type}}" data-key="{{setting.key}}">
+                        <label for="sm-{{setting.key}}" >{{setting.name}}</label>
+                        {{#if setting.button}}
+                            <button type="button" class="vsm-setting-menu-button" data-key="{{setting.key}}">
+                                <i class="{{setting.icon}}"></i>
+                                <label>{{setting.label}}</label>
+                            </button>
+                        {{else}}
+                            <div class="form-fields">
+                                {{#if (eq setting.type "boolean")}}
+                                    <input type="checkbox" id="sm-{{setting.key}}" data-dtype="Boolean" {{#if setting.value}}checked{{/if}}>
+                                {{else if (eq setting.type "number")}}
+                                    {{#if setting.range}}
+                                        <input type="range" class="vsm-range-slider" min="{{setting.range.min}}" max="{{setting.range.max}}" step="{{setting.range.step}}" value="{{setting.value}}">
+                                        <input type="number" class="vsm-range-number" id="sm-{{setting.key}}" value="{{setting.value}}" min="{{setting.range.min}}" max="{{setting.range.max}}" step="{{setting.range.step}}">
+                                    {{else}}
+                                        <input type="number" id="sm-{{setting.key}}" value="{{setting.value}}" step="any">
+                                    {{/if}}
+                                {{else if (eq setting.type "string")}}
+                                    {{#if setting.choices}}
+                                        <div class="vsm-choice-group">
+                                            {{#each setting.choices as |item|}}
+                                                <button type="button" class="vsm-choice-button{{#if (eq item.key setting.value)}} vsm-choice-active{{/if}}" data-value="{{item.key}}">{{item.value}}</button>
+                                            {{/each}}
+                                        </div>
+                                    {{else if setting.filePicker}}
+                                        <input type="text" class="vsm-filepicker-input" name="{{setting.key}}" value="{{setting.value}}" data-dtype="String">
+                                        <button type="button" class="vsm-filepicker" data-type="{{setting.filePicker}}" data-target="{{setting.key}}" title="{{localize "FILES.BrowseTooltip"}}" tabindex="-1">
+                                            <i class="fas fa-file-import fa-fw"></i>
+                                        </button>
+                                    {{else}}
+                                        <input type="text" id="sm-{{setting.key}}" value="{{setting.value}}" data-dtype="String">
+                                    {{/if}}
+                                {{/if}}
+                            </div>
+                        {{/if}}
+                        <p class="notes" for="sm-{{setting.key}}" >{{setting.hint}}</p>
+                    </div>
+                {{/each}}
+            </div>
+        </form>
+    {{/if}}
+</div>

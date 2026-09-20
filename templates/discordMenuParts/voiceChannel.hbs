@@ -1,0 +1,38 @@
+{{!-- Список пользователей в войсе --}}
+<div class="dsm-voice-users" {{#if notHost}}style="display: none"{{/if}}>
+    <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.voiceUsers"}}</div>
+    <div class="dsm-connection-warning{{#if isConnected}} dsm-hidden{{/if}}">
+        <div class="dsm-warning-box">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>{{localize "visual-novel-reverse.discordMenu.voiceConnectionWarning"}}</span>
+        </div>
+    </div>
+    <div class="dsm-voice-box{{#unless isConnected}} dsm-hidden{{/unless}}">
+        <div class="dsm-users-list">
+            <div class="dsm-voice-name">
+                <i class="fas fa-volume-high"></i>
+                <span>{{voiceChannelName}}</span>
+            </div>
+            {{#each voiceUsers}}
+            <div class="dsm-user-item flexrow">
+                {{#if this.isOurBot}} <i class="fas fa-robot" style="margin-right: 5px; flex: 0"></i>{{/if}}
+                <span class="dsm-user-name">{{this.name}}</span>
+            </div>
+            {{/each}}
+        </div>
+        <div class="dsm-voice-controls">
+            <div class="dsm-voice-button-box">
+                <div class="dsm-voice-button" data-action="addBot">
+                    <i class="fas fa-phone"></i>
+                    <span>{{localize "visual-novel-reverse.discordMenu.voiceAddBot"}}</span>
+                </div>
+            </div>
+            <div class="dsm-voice-button-box">
+                <div class="dsm-voice-button" data-action="kickBot">
+                    <i class="fas fa-phone-slash"></i>
+                    <span>{{localize "visual-novel-reverse.discordMenu.voiceKickBot"}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

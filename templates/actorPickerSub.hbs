@@ -1,0 +1,49 @@
+<form style="position: relative;">
+    <h3 class="aps-title">{{localize "visual-novel-reverse.actorPickerSub.image-title"}}</h3>
+    <div class="form-group">
+        <span class="aps-span">{{localize "visual-novel-reverse.actorPickerSub.image-label"}}</span>
+        <div class="form-fields">
+            <button type="button" class="aps-file-picker" style="order: 99;" title="{{localize "visual-novel-reverse.actorPickerSub.image-button"}}">
+                <i class="fas fa-file-import fa-fw"></i>
+            </button>
+            <input class="image aps-choose-img" type="text" placeholder="path/image.png" value="{{portFlags.img}}">
+        </div>
+    </div>
+    <div class="aps-sprites-container"></div>
+    <div class="form-group">
+        <button type="button" class="aps-add-sprite">
+            <i class="fas fa-plus"></i> {{localize "visual-novel-reverse.actorPickerSub.addSpriteButton"}}
+        </button>
+    </div>
+    <h3 class="aps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.actorPickerSub.name-title"}}</h3>
+    <div class="form-group">
+        <div class="form-fields">
+            <input class="aps-text-input aps-name" type="text" placeholder="{{localize "visual-novel-reverse.placeholders.namePlaceholder"}}" value="{{portFlags.name}}">
+        </div>
+    </div>
+    <h3 class="aps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.actorPickerSub.title-title"}}</h3>
+    <div class="form-group">
+        <div class="form-fields">
+            <input class="aps-text-input aps-title" type="text" placeholder="{{localize "visual-novel-reverse.placeholders.titlePlaceholder"}}" value="{{portFlags.title}}">
+        </div>
+    </div>
+    <h3 class="aps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.actorPickerSub.folder-title"}}</h3>
+    <div class="form-group">
+        <div class="form-fields">
+            <select class="aps-folder-select">
+                <option value="">{{localize "visual-novel-reverse.actorPickerSub.noFolderOption"}}</option>
+                {{#each folderCategories as |cat|}}
+                    <optgroup label="{{cat.name}}">
+                        {{#each cat.folders as |f|}}
+                            <option value="{{f.value}}" {{#if f.selected}}selected{{/if}}>{{f.name}}</option>
+                        {{/each}}
+                    </optgroup>
+                {{/each}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+    <button type="submit" class="aps-submit-button">{{localize "visual-novel-reverse.actorPickerSub.submit"}}</button>
+    <button type="submit" class="aps-delete-button">{{localize "visual-novel-reverse.actorPickerSub.delete"}}</button>
+    </div>
+</form>

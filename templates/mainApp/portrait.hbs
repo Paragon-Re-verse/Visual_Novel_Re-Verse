@@ -1,0 +1,10 @@
+{{!-- Тело портрера --}}
+<div class="vn-pBody-{{side}} vn-pBody" data-side="{{side}}" data-action="portraitClick" data-index="{{index}}" data-pos="{{side}}{{index}}" style="z-index:{{speaker.zIndex}};" data-id="{{speaker.id}}" data-tooltip="{{speaker.name}}{{#if speaker.title}}, {{speaker.title}}{{/if}}">
+    {{!-- Контейнер портрета (нужен для корректного смещение и отзеркаливания для портретов в левой части) --}}
+    <div class="vn-portrait {{#if speaker.active}}vn-main{{/if}} {{side}}{{index}}" style="z-index:{{speaker.zIndex}};{{#if speaker.widthEqualFrame}} width: 98%; height: auto;{{/if}}">
+        {{!-- Изображение портрета --}}
+        <img class="vn-port-{{side}}" src="{{speaker.img}}" style="{{side}}:{{speaker.offsetX}}px; top:{{speaker.offsetY}}px; transform: scale({{speaker.scale}}%) scaleX({{#if speaker._mirrorX}}1{{else}}-1{{/if}});"/>
+    </div> 
+    {{!-- Пустой контейнер (отображаемый контур псевдо-контейнера портрета для перетягивания нового актёра) --}}
+    <div class="vn-pField-{{side}} vn-pField {{pFieldClass}}"></div>
+</div>

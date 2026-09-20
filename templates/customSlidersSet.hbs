@@ -1,0 +1,23 @@
+<form class="custom-sliders-menu" style="position: relative;">
+    {{#each groups as |group|}}
+        <div class="csm-container flexrow" data-id="{{group.id}}" data-tooltip="{{group.setName}}">
+            <div class="csn-images">
+                <img class="csm-header" src="{{group.headerImg}}">
+                <img class="csm-left csm-slider" src="{{group.leftSlider}}" style="left: 0">
+                <img class="csm-right csm-slider" src="{{group.rightSlider}}" style="right: 0">
+                <img class="csm-left csm-slider" src="{{group.leftSliderBack}}" style="left: 0">
+                <img class="csm-right csm-slider" src="{{group.rightSliderBack}}" style="right: 0">
+            </div>
+            <div class="csm-buttons">
+                <button class="csm-preview{{#unless group.id}} vn-disabled{{/unless}}"><i class="fa-solid fa-eye"></i><label>{{localize "visual-novel-reverse.customSliders.previewButton"}}</label></button>
+                <button class="csm-edit{{#unless group.id}} vn-disabled{{/unless}}"><i class="fa-solid fa-wrench"></i><label>{{localize "visual-novel-reverse.customSliders.editButton"}}</label></button>
+            </div>
+            <button type="deleteSet" class="csm-delete-button" data-id="{{group.id}}" data-tooltip="{{localize "visual-novel-reverse.customSliders.deleteSet"}}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    {{/each}}
+    <div class="csm-addButton">
+        <i class="fa-solid fa-plus"></i>
+    </div>
+</form>

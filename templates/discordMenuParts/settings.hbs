@@ -1,0 +1,58 @@
+{{!-- Настройки интеграции --}}
+<div class="dsm-settings">
+    <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.settings"}}</div>
+
+    {{!-- ID пользователя (Foundry) - хоста Discord Bridge --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordHostUserIdHint"}} ">
+        <label>{{localize "visual-novel-reverse.settings.discordHostUserId"}}</label>
+        <select name="hostUserId">
+            {{#each users as |user|}}
+                <option value="{{user.id}}" {{#if (eq user.id ../settings.hostUserId)}}selected{{/if}}>{{user.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    
+    {{!-- ID голосового канала --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordChannelIdHint"}} ">
+        <label>{{localize "visual-novel-reverse.settings.discordChannelId"}}</label>
+        <input type="text" name="channelId" value="{{settings.channelId}}" data-action="updateChannelId" />
+    </div>
+
+    {{!-- Ваше ID пользователя в Discord --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordUserIdHint"}} ">
+        <label>{{localize "visual-novel-reverse.settings.discordUserId"}}</label>
+        <input type="text" name="userId" value="{{settings.userId}}" data-action="updateUserId" />
+    </div>
+
+    {{!-- Уведомления о статусе голосового канала --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordNotificationsHint"}} ">
+        <label>
+            <input type="checkbox" name="notifyVoiceStatus" {{#if settings.notifyVoiceStatus}}checked{{/if}} data-action="updateNotifications" />
+            <span>{{localize "visual-novel-reverse.settings.discordNotifications"}}</span>
+        </label>
+    </div>
+
+    {{!-- Синхронизация портретов игроков с голосовым каналом --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordActivitySyncHint"}} ">
+        <label>
+            <input type="checkbox" name="syncPortraits" {{#if settings.syncPortraits}}checked{{/if}} data-action="updateActivitySync" />
+            <span>{{localize "visual-novel-reverse.settings.discordActivitySync"}}</span>
+        </label>
+    </div>
+
+    {{!-- Автоматическое подключение к Discord Bridge при запуске мира --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordAutoConnectHint"}} ">
+        <label>
+            <input type="checkbox" name="autoConnect" {{#if settings.autoConnect}}checked{{/if}} data-action="updateAutoConnect" />
+            <span>{{localize "visual-novel-reverse.settings.discordAutoConnect"}}</span>
+        </label>
+    </div>
+
+    {{!-- Выделение персонажей Мастера (НПС) --}}
+    <div class="dsm-setting-item" data-tooltip="{{localize "visual-novel-reverse.settings.discordHighlightGMHint"}} ">
+        <label>
+            <input type="checkbox" name="highlightGM" {{#if settings.highlightGM}}checked{{/if}} data-action="highlightGM" />
+            <span>{{localize "visual-novel-reverse.settings.discordHighlightGM"}}</span>
+        </label>
+    </div>
+</div>

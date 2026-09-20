@@ -1,0 +1,101 @@
+<div id="vn-edit-window" class="{{editWindowClass}}" style="width: {{editWindowWidth}};{{#unless showEditWindow}} display: none;{{/unless}}">
+    {{!-- Выбор персонажа (портрета) который будет редактироваться в этом окне --}}
+    <div class="vn-ew-portraits-field">
+        <div class="vn-ew-header">
+            <span class="vn-ew-title" style="font-size: 1.25em;">{{localize "visual-novel-reverse.vn-edit.portraits"}}</span>
+            <div data-action="openActorPicker" class="vn-ew-header-buttons" data-tooltip="{{localize "visual-novel-reverse.buttons.addActor"}}"><i class="fa-solid fa-user-plus vn-icon-button"></i></div>
+            <div data-action="locationClick" class="vn-ew-header-buttons" data-type="location" data-tooltip="{{localize "visual-novel-reverse.buttons.locationPicker"}}"><i class="fa-solid fa-images vn-icon-button"></i></div>
+            <div style="flex: 1;"></div>
+            <div data-action="editWindowHint" class="vn-ew-header-buttons" data-tooltip="{{localize "visual-novel-reverse.buttons.ewInfo"}}"><i class="fa-solid fa-question vn-icon-button"></i></div>
+            <div data-action="closeEditWindow" class="vn-ew-header-buttons" data-tooltip="{{localize "visual-novel-reverse.buttons.ewClose"}}"><i class="fa-solid fa-xmark vn-icon-button"></i></div>
+        </div>
+        <div class="vn-ew-portraits flexrow">
+            {{#each activeSpeakers.left as |speaker|}}
+                <div data-side="left" data-index="{{speaker.index}}" data-pos="left{{speaker.index}}" data-id="{{speaker.id}}" data-action="ewPortraitClick" class="vn-ew-slot{{#if speaker.isEdit}} vn-hlight {{/if}}{{#if speaker.active}} vn-active{{/if}}">
+                    <img src="{{speaker.img}}" style="transform: scaleX({{#if speaker.mirrorX}}1{{else}}-1{{/if}});{{#unless speaker.img}}display: none;{{/unless}}"/>
+                </div>
+            {{/each}}
+            <div class="vm-ew-mid-border"></div>
+            {{#each activeSpeakers.right as |speaker|}}
+                <div data-side="right" data-index="{{speaker.index}}" data-pos="right{{speaker.index}}" data-id="{{speaker.id}}" data-action="ewPortraitClick" class="vn-ew-slot{{#if speaker.isEdit}} vn-hlight {{/if}}{{#if speaker.active}} vn-active{{/if}}">
+                    <img src="{{speaker.img}}" style="transform: scaleX({{#if speaker.mirrorX}}-1{{else}}1{{/if}});{{#unless speaker.img}}display: none;{{/unless}}"/>
+                </div>
+            {{/each}}
+        </div>
+    </div>
+    {{!-- Поля смены имени и титула редактируемого персонажа --}}
+    <div class="vn-ew-field">
+        <div class="vn-ew-header" style="display: grid;">
+            <div class="vn-ew-title-box">
+                <h3 class="vn-ew-title">{{localize "visual-novel-reverse.vn-edit.name"}}</h3>
+                <i class="vn-ew-hide fas fa-eye{{#if editActorData.hideName}}-slash{{/if}}" data-action="toggleNameOrTitle" data-key="Name"></i>
+            </div>
+            <div class="vn-ew-title-box">
+                <h3 class="vn-ew-title">{{localize "visual-novel-reverse.vn-edit.title"}}</h3>
+                <i class="vn-ew-hide fas fa-eye{{#if editActorData.hideTitle}}-slash{{/if}}" data-action="toggleNameOrTitle" data-key="Title"></i>
+            </div>
+        </div>
+        <div class="vn-ew-input-fields">
+            <input class="vn-edit-name" type="text" placeholder="{{localize "visual-novel-reverse.placeholders.actorName"}}" value="{{editActorData.name}}">
+            <input class="vn-edit-title" type="text" placeholder="{{localize "visual-novel-reverse.placeholders.actorTitle"}}" value="{{editActorData.title}}">
+        </div>
+    </div>
+    {{!-- Поле смены масштаба и смещения редактируемого персонажа --}}
+    <div class="vn-edit-slider-container">
+        {{!-- Размер --}}
+        <div>
+            <label>{{localize "visual-novel-reverse.vn-edit.scale"}}</label>
+            <div class="vn-edit-slider">
+                <input id="vn-edit-scale" type="range" class="" name="scale" value="{{editActorData.scale}}" min="0" max="200" step="1">
+                <span class="range-scale-value">{{editActorData.scale}}%</span>
+            </div>
+        </div>
+        {{!-- Смещение по оси X --}}
+        <div>
+            <label>{{localize "visual-novel-reverse.vn-edit.offsetX"}}</label>
+            <div class="vn-edit-slider">
+                <input id="vn-edit-offsetX" type="range" class="" name="coordX" value="{{editActorData.offsetX}}" min="-250" max="250" step="1">
+                <span class="range-coordX-value">{{editActorData.offsetX}}</span>
+            </div>
+        </div>
+        {{!-- Смещение по оси Y --}}
+        <div>
+            <label>{{localize "visual-novel-reverse.vn-edit.offsetY"}}</label>
+            <div class="vn-edit-slider">
+                <input id="vn-edit-offsetY" type="range" class="" name="coordY" value="{{editActorData.offsetY}}" min="-250" max="250" step="1">
+                <span class="range-coordY-value">{{editActorData.offsetY}}</span>
+            </div>
+        </div>
+    </div>
+    {{!-- Дополнительные настройки --}}
+    <div class="vn-ew-field">
+        <div class="vn-ew-header">
+            <h3 class="vn-ew-title" style="width: 100%;">{{localize "visual-novel-reverse.vn-edit.additional"}}</h3>
+        </div>
+        <div class="flexrow vn-edit-additional">
+            <div class="form-fields">
+                <label for="vn-edit-mirrorX">{{localize "visual-novel-reverse.vn-edit.mirrorX"}}</label>
+                <input id="vn-edit-mirrorX" type="checkbox" name="mirrorX" {{#if editActorData.mirrorX}}checked{{/if}}>
+            </div>
+            <div class="form-fields">
+                <label for="vn-edit-widthEqualFrame">{{localize "visual-novel-reverse.vn-edit.widthEqualFrameWidth"}}</label>
+                <input id="vn-edit-widthEqualFrame" type="checkbox" name="widthEqualFrame" {{#if editActorData.widthEqualFrame}}checked{{/if}}>
+            </div>
+        </div>
+    </div>
+    {{!-- Кнопки окна редактирования --}}
+    <div class="vn-edit-buttons-container">
+        <button type="button" data-action="confirmChanges" class="vn-edit-apply">
+            <i class="fa-solid fa-check"></i><label>{{localize "visual-novel-reverse.vn-edit.apply-button"}}</label>
+        </button>
+        <button type="button" data-action="cancelChanges" class="vn-edit-cancel">
+            <i class="fa-solid fa-xmark"></i><label>{{localize "visual-novel-reverse.vn-edit.cancel-button"}}</label>
+        </button>
+        <button type="button" data-action="zeroSettings" class="vn-edit-zeroSettings" style="font-weight: 500" data-tooltip="{{localize "visual-novel-reverse.vn-edit.zeroSettings"}}">
+            <i class="fa-brands fa-creative-commons-zero"></i>
+        </button>
+        <button type="button" data-action="deleteActor" class="vn-edit-deleteActor" data-tooltip="{{localize "visual-novel-reverse.vn-edit.deleteActor"}}">
+            <i class="fa-solid fa-trash"></i>
+        </button>
+    </div>
+</div>

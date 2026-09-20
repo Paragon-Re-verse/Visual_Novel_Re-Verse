@@ -1,0 +1,40 @@
+<div class="dsm-troubleshooting">
+    <div class="dsm-section-header">{{localize "visual-novel-reverse.discordMenu.troubleshooting"}}</div>
+    <div class="dsm-troubleshooting-speakers-grid flexcol">
+        {{#if noProblems}}
+            <div class="dsm-no-problems">
+                <div class="dsm-no-problems-text">{{localize "visual-novel-reverse.discordMenu.everythingIsFine"}}</div>
+            </div>
+        {{else}}
+            {{#each troubles}}
+            <div class="dsm-trouble flexrow" data-tooltip="{{localize (concat "visual-novel-reverse.discordMenu.troubles.hint" this)}}">
+                <i class="fas fa-exclamation-triangle flex0"></i>
+                <span class="dsm-trouble-name">{{localize (concat "visual-novel-reverse.discordMenu.troubles." this)}}</span>
+                <div class="dsm-trouble-icon flex0"><i class="fas fa-circle-info"></i></div>
+            </div>
+            {{/each}}
+            {{#each speakersStatus}}
+            <div class="dsm-trouble-user" data-id="{{this.id}}">
+                <div class="dsm-trouble flexrow">
+                    <i class="fas fa-user flex0"></i>
+                    <span class="dsm-trouble-name">{{this.name}}</span>
+                </div>
+                <div class="dsm-speaker-status">
+                    {{#if this.noChar}}
+                    <div class="dsm-trouble flexrow" data-tooltip="{{localize "visual-novel-reverse.discordMenu.troubles.noCharHint"}}">
+                        <span class="dsm-trouble-text">— {{localize "visual-novel-reverse.discordMenu.troubles.noChar"}}</span>
+                        <div class="dsm-trouble-icon flex0"><i class="fas fa-circle-info"></i></div>
+                    </div>
+                    {{/if}}
+                    {{#if this.noId}}
+                    <div class="dsm-trouble flexrow" data-tooltip="{{localize "visual-novel-reverse.discordMenu.troubles.noIdHint"}}">
+                        <span class="dsm-trouble-text">— {{localize "visual-novel-reverse.discordMenu.troubles.noId"}}</span>
+                        <div class="dsm-trouble-icon flex0"><i class="fas fa-circle-info"></i></div>
+                    </div>
+                    {{/if}}
+                </div>
+            </div>
+            {{/each}}
+        {{/if}}
+    </div>
+</div>

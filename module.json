@@ -1,0 +1,41 @@
+{
+  "title": "Visual Novel Re:Verse",
+  "description": "This module allows you to transform your social scenes using the Visual Novels Dialogues window in the style of visual novels or JRPGs, but with special functionality designed for comfortable D&amp;D, or other TTRPGs sessions.",
+  "version": "2.2.2",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "13"
+  },
+  "socket": true,
+  "authors": [
+    {
+      "name": "Paragon",
+      "flags": {}
+    }
+  ],
+  "esmodules": [
+    "scripts/main.js",
+    "scripts/settings.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "ru",
+      "name": "Russian",
+      "path": "language/ru.json",
+      "flags": {}
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "language/en.json",
+      "flags": {}
+    }
+  ],
+  "id": "visual-novel-reverse",
+  "url": "https://github.com/Paragon-Re-verse/Visual_Novel_Re-Verse",
+  "manifest": "https://module.fvtt.club/s/eAFpCKL3b3ndjmd/download",
+  "download": "https://module.fvtt.club/s/pT3WsMZcWJoqYeiK/download"
+}

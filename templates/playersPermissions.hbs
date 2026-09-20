@@ -1,0 +1,37 @@
+<form class="pps-form" style="position: relative;">
+    <form>
+        <p class="notes">{{localize "PERMISSION.Instructions"}}</p>
+
+        <header class="table-header flexrow">
+            <label class="index">{{localize "PERMISSION.Permission"}}</label>
+            <label>{{localize "USER.RolePlayer"}}</label>
+            <label>{{localize "USER.RoleTrusted"}}</label>
+            <label>{{localize "USER.RoleAssistant"}}</label>
+            <label>{{localize "USER.RoleGamemaster"}}</label>
+        </header>
+
+        {{#each permissions as |this|}}
+            <ul class="permissions-list">
+                <li class="permission form-group" data-name="{{this.name}}">
+                    <label class="index">{{localize (concat "visual-novel-reverse.permissions." this.name)}}</label>
+                    <div class="form-fields">
+                        {{#each this.perms as |perm|}}
+                            <input type="checkbox" data-index="{{perm.index}}" {{#if perm.select}}checked{{/if}} {{#if (eq perm.index 4)}}disabled{{/if}}>
+                        {{/each}}
+                    </div>
+                    <p class="hint">{{localize (concat "visual-novel-reverse.permissions." (concat this.name "Hint"))}}</p>
+                </li>
+            </ul>
+        {{/each}}
+
+        <div class="form-group">
+            <button type="submit" class="pps-submit-button">
+                <i class="fas fa-save"></i> {{localize "PERMISSION.Submit"}}
+            </button>
+
+            <button type="submit" name="reset" class="pps-reset-button">
+                <i class="fas fa-sync"></i> {{localize "PERMISSION.Reset"}}
+            </button>
+        </div>
+    </form>
+</form>
