@@ -1,11 +1,8 @@
 name: Release
 
-# Собирает zip для каждого модуля репозитория (module.json в корне и в
-# подпапках на один уровень) и публикует их в одном GitHub Release при
-# пуше тега vX.Y.Z. Для модуля в корне (visual-novel-reverse) подпапки
-# других модулей исключаются из его zip. module.json.download
-# (releases/latest/download/<id>.zip) и .manifest (raw module.json на
-# main) рассчитаны именно на этот workflow.
+# Собирает zip модуля и публикует GitHub Release при пуше тега vX.Y.Z.
+# module.json.download (releases/latest/download/<id>.zip) и .manifest (raw
+# module.json на main) рассчитаны именно на этот workflow.
 
 on:
   push:
@@ -29,38 +26,22 @@ jobs:
         with:
           ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
 
-      - name: Build module zips
+      - name: Read module id
+        id: module
+        run: echo "id=$(jq -r '.id' module.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build module zip
+        env:
+          MODULE_ID: ${{ steps.module.outputs.id }}
         run: |
-          set -euo pipefail
-          mkdir -p build
-          mapfile -t module_jsons < <(find . -maxdepth 2 -name module.json | sed 's|^\./||' | sort)
-
-          for module_json in "${module_jsons[@]}"; do
-            dir=$(dirname "$module_json")
-            id=$(jq -r '.id' "$module_json")
-            mkdir -p "build/$id"
-
-            if [ "$dir" = "." ]; then
-              exclude_args=()
-              for other in "${module_jsons[@]}"; do
-                other_dir=$(dirname "$other")
-                if [ "$other_dir" != "." ]; then
-                  exclude_args+=(--exclude="$other_dir")
-                fi
-              done
-              rsync -a --exclude='.git' --exclude='.github' --exclude='build' --exclude='*.DS_Store' \
-                "${exclude_args[@]}" ./ "build/$id/"
-            else
-              rsync -a --exclude='.git' --exclude='.github' --exclude='build' --exclude='*.DS_Store' \
-                "$dir/" "build/$id/"
-            fi
-
-            (cd build && zip -r "../$id.zip" "$id")
-          done
+          mkdir -p "build/$MODULE_ID"
+          rsync -a --exclude='.git' --exclude='.github' --exclude='build' --exclude='*.DS_Store' \
+            ./ "build/$MODULE_ID/"
+          (cd build && zip -r "../$MODULE_ID.zip" "$MODULE_ID")
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag || github.ref_name }}
-          files: "*.zip"
+          files: ${{ steps.module.outputs.id }}.zip
           generate_release_notes: true
