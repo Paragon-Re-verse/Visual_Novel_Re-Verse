@@ -253,8 +253,12 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                     canSeeDiscordMenu: game.user.isGM || game.user.id == game.settings.get(C.ID, "discordHostUserId"),
                     // Полоски спрайтов "Активного персонажа" - см. _getSpriteStripData: у GM это персонаж, выбранный
                     // в "Портретах" окна редактирования, у игрока - его собственный привязанный персонаж
-                    spriteStripLeft: _getSpriteStripData("left", settingData),
-                    spriteStripRight: _getSpriteStripData("right", settingData),
+                    // Показываем только пока VN реально открыт для этого пользователя (context.showVN) - иначе
+                    // _getSpriteStripData не проверяет showVN вообще, и полоска (.vn-sprite-strip, у неё
+                    // pointer-events: all в CSS) остаётся в DOM и кликабельной поверх интерфейса Foundry
+                    // даже при закрытом диалоговом окне VN
+                    spriteStripLeft: context.showVN ? _getSpriteStripData("left", settingData) : null,
+                    spriteStripRight: context.showVN ? _getSpriteStripData("right", settingData) : null,
                 }
                 // +bodyClass, +shownElements, +editWindowClass
                 break;
