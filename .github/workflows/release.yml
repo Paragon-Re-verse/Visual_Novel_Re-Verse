@@ -1,0 +1,39 @@
+name: Release
+
+# Собирает zip модуля и публикует GitHub Release при пуше тега vX.Y.Z.
+# module.json.download (releases/latest/download/<id>.zip) и .manifest (raw
+# module.json на main) рассчитаны именно на этот workflow.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read module id
+        id: module
+        run: echo "id=$(jq -r '.id' module.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Build module zip
+        env:
+          MODULE_ID: ${{ steps.module.outputs.id }}
+        run: |
+          mkdir -p "build/$MODULE_ID"
+          rsync -a --exclude='.git' --exclude='.github' --exclude='build' --exclude='*.DS_Store' \
+            ./ "build/$MODULE_ID/"
+          (cd build && zip -r "../$MODULE_ID.zip" "$MODULE_ID")
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.module.outputs.id }}.zip
+          generate_release_notes: true
