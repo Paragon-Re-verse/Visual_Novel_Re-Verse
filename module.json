@@ -36,6 +36,6 @@
   ],
   "id": "visual-novel-reverse",
   "url": "https://github.com/Paragon-Re-verse/Visual_Novel_Re-Verse",
-  "manifest": "https://module.fvtt.club/s/eAFpCKL3b3ndjmd/download",
-  "download": "https://module.fvtt.club/s/pT3WsMZcWJoqYeiK/download"
+  "manifest": "https://raw.githubusercontent.com/Paragon-Re-verse/Visual_Novel_Re-Verse/main/module.json",
+  "download": "https://github.com/Paragon-Re-verse/Visual_Novel_Re-Verse/releases/latest/download/visual-novel-reverse.zip"
 }
