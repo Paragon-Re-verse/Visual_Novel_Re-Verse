@@ -1,0 +1,81 @@
+<form id="vn-location-picker-sub">
+    <h3 class="lps-title">{{localize "visual-novel-reverse.locationPickerSub.location.imageHeader"}}</h3>
+    <div class="form-group">
+        <span class="lps-span">{{localize "visual-novel-reverse.locationPickerSub.image-path"}}</span>
+        <div class="form-fields">
+            <button type="button" class="lps-file-picker" title="{{localize "visual-novel-reverse.locationPickerSub.image-button"}}">
+                <i class="fas fa-file-import"></i>
+            </button>
+            <input class="image lps-choose-img" type="text" placeholder="path/image.png" value="{{backgroundImage}}">
+        </div>
+    </div>
+    <h3 class="lps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.locationPickerSub.location.nameHeader"}}</h3>
+    <div class="form-group">
+        <div class="form-fields">
+            <input class="lps-loc-input" type="text" placeholder="{{localize "visual-novel-reverse.locationPickerSub.location.namePlaceholder"}}" value="{{locName}}">
+        </div>
+    </div>
+    <h3 class="lps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.locationPickerSub.location.parNameHeader"}}</h3>
+    <div class="form-group">
+        <div class="form-fields">
+            <input class="lps-par-input" type="text" placeholder="{{localize "visual-novel-reverse.locationPickerSub.location.parNamePlaceholder"}}" value="{{parName}}">
+        </div>
+    </div>
+    {{!-- <h3 class="vn-locEdit-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.locationPickerSub.locEdit"}}</h3>
+    <div class="vn-locEdit-slider-container">
+        <div>
+            <label>{{localize "visual-novel-reverse.locationPickerSub.scale"}}</label>
+            <div class="vn-locEdit-slider">
+                <input id="vn-locEdit-scale" type="range" class="" name="scale" value="{{location.scale}}" min="100" max="200" step="1">
+                <span class="range-scale-value-background">{{location.scale}}%</span>
+            </div>
+        </div>
+        <div>
+            <label>{{localize "visual-novel-reverse.locationPickerSub.offsetX"}}</label>
+            <div class="vn-locEdit-slider">
+                <input id="vn-locEdit-offsetX" type="range" class="" name="coordX" value="{{location.offsetX}}" min="-2500" max="2500" step="1">
+                <span class="range-coordX-value-background">{{location.offsetX}}</span>
+            </div>
+        </div>
+        <div>
+            <label>{{localize "visual-novel-reverse.locationPickerSub.offsetY"}}</label>
+            <div class="vn-locEdit-slider">
+                <input id="vn-locEdit-offsetY" type="range" class="" name="coordY" value="{{location.offsetY}}" min="-2500" max="2500" step="1">
+                <span class="range-coordY-value-background">{{location.offsetY}}</span>
+            </div>
+        </div>
+    </div> --}}
+    <h3 class="lps-title" style="margin-top: 9px;">{{localize "visual-novel-reverse.locationPickerSub.presets"}}</h3>
+    <div class="lps-preset-buttons flexrow">
+        <button type="button" class="lps-preset-add">{{localize "visual-novel-reverse.locationPickerSub.addPreset"}}</button>
+        <button type="button" class="lps-preset-snapshot">{{localize "visual-novel-reverse.locationPickerSub.snapshot"}}</button>
+    </div>
+    <div class="form-fields lps-preset-body" style="margin-top: 5px; margin-bottom: 5px;">
+        {{#each location.presets as |preset|}}
+            <div class="lps-preset-container" data-id="{{preset.id}}">
+                <div class="lps-preset-locInfo flexrow">
+                    <div class="lps-preset-names">
+                        <span class="lps-preset-name">{{preset.locationData.locationName}}</span>
+                        <span class="lps-preset-parName">{{preset.locationData.parentLocation}}</span>
+                    </div>
+                    <div class="lps-weather">
+                        <i class="fas {{preset.locationData.weather.icon}}"></i>
+                        <span>{{preset.locationData.weather.name}}</span>
+                    </div>
+                    <div class="lps-temperature">
+                        <span>{{preset.locationData.temperature}}°C</span>
+                    </div>
+                </div>
+                <div class="lps-preset-portraits flexrow">
+                    {{#each preset.portraits as |portrait|}}
+                        <div class="lps-preset-portrait" data-tooltip="{{portrait.name}}" data-id="{{portrait.id}}">
+                            <img src="{{portrait.img}}"/>
+                        </div>
+                    {{/each}}
+                </div>
+                <button type="button" class="lps-delete-button" data-tooltip="{{localize "visual-novel-reverse.locationPickerSub.deletePreset"}}"><i class="fas fa-trash"></i></button>
+            </div>
+        {{/each}}
+    </div>
+    <button type="submit" class="lps-submit-button">{{localize "visual-novel-reverse.locationPickerSub.submit"}}</button>
+</form>

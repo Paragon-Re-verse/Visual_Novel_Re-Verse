@@ -1,0 +1,54 @@
+<form id="vn-location-picker" class="flexcol">
+    <div class="lp-filter-body">
+        {{#each filterList as |filter|}}
+            <div class="lp-filter-option flexrow {{#if filter.active}}.lp-hlight{{/if}}" data-name="{{filter.name}}">
+                <img src="{{filter.image}}"/>
+                <label>{{filter.name}}</label>
+                <button type="deleteFilter" class="lp-delete-button" data-name="{{filter.name}}" data-tooltip="{{localize "visual-novel-reverse.locationPicker.deleteFilter"}}">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        {{/each}}
+    </div>
+    <div class="lp-mid-subbody">
+        <div class="lp-buttons-and-search flexrow">
+            <button type="addFilter" class="lp-add-filter-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.addFilter"}}">
+                <i class="fas fa-plus"></i>
+                <i class="fas fa-filter"></i>
+            </button>
+            <button type="addLocation" class="lp-add-location-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.addLocation"}}">
+                <i class="fas fa-plus"></i>
+                <i class="fas fa-tree-city"></i>
+            </button>
+            <button type="massImport" class="lp-mass-import-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.massImportButton"}}">
+                <i class="fas fa-clone"></i>
+            </button>
+            <input type="text" class="lp-search-input flex1" placeholder="{{placeholderText}}" value="{{filterText}}"/>
+            <button type="changeMode" class="lp-change-mode-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.changeMode"}}" style="border-radius: 0 7px 7px 0;margin-left: 0;">
+                <i class="fas fa-rotate"></i>
+            </button>
+            <button type="deleteAllBackgrounds" class="lp-delete-all-backgrounds-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.deleteAllBackgrounds"}}">
+                <i class="fas fa-trash"></i>
+                <i class="fas fa-image"></i>
+            </button>
+            <button type="clearFilters" class="lp-clear-filters-button flex0" data-tooltip="{{localize "visual-novel-reverse.locationPicker.clearFilters"}}">
+                <i class="fas fa-filter-circle-xmark"></i>
+            </button>
+        </div>
+    </div>
+    <div class="lp-list-body">
+        {{#each locations as |column|}}
+            <div class="lp-location-column flexcol">
+                {{#each column as |location|}}
+                    <div class="lp-location-option flexcol" data-id="{{location.id}}">
+                        <div class="lp-location-img-body"><img src="{{location.backgroundImage}}"/></div>
+                        <div class="lp-location-text-body"><label>{{location.locationName}}</label></div>
+                        <button type="deleteLocation" class="lp-delete-button" data-id="{{location.id}}" data-tooltip="{{localize "visual-novel-reverse.locationPicker.deleteLocation"}}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                {{/each}}
+            </div>
+        {{/each}}
+    </div>
+</form>

@@ -1,0 +1,11 @@
+{{!-- Состояние подключения и кнопка --}}
+<div class="dsm-connection-status flexrow">
+    <div class="dsm-status {{#if isConnected}}connected{{/if}}">
+        <i class="fas {{#if isConnected}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
+        <span>{{#if isConnected}}{{localize "visual-novel-reverse.discordMenu.statusConnected"}}{{else}}{{localize "visual-novel-reverse.discordMenu.statusDisconnected"}}{{/if}}</span>
+    </div>
+    <button class="dsm-connect-button" {{#if disableButton}}disabled{{/if}} data-action="connect" {{#if notHost}}data-tooltip="{{localize 'visual-novel-reverse.discordMenu.notHost'}}"{{/if}}>
+        <i class="fab fa-discord"></i>
+        <span>{{#if isConnected}}{{localize "visual-novel-reverse.discordMenu.buttonDisconnect"}}{{else}}{{localize "visual-novel-reverse.discordMenu.buttonConnect"}}{{/if}}</span>
+    </button>
+</div>

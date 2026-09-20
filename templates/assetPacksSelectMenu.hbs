@@ -1,0 +1,27 @@
+<form class="apsm-form">
+    {{#if showLocations}}
+        <div class="apsm-container">
+            <h3 class="apsm-title">{{localize "visual-novel-reverse.assetMenu.locTitle"}}</h3>
+            {{#each locationPacks as |locPack|}}
+                <div class="form-group">
+                    <label class="apsm-label">{{locPack.name}}</label>
+                    <input class="apsm-input aspm-locInput" type="checkbox" data-id="{{locPack.id}}">
+                    <p class="apsm-hint">{{localize "visual-novel-reverse.assetMenu.locCount"}} - {{locPack.count}}</p>
+                </div>
+            {{/each}}
+        </div>
+    {{/if}}
+    {{#if showPortraits}}
+        <div class="apsm-container">
+            <h3 class="apsm-title">{{localize "visual-novel-reverse.assetMenu.portTitle"}}</h3>
+            {{#each portraitPacks as |portPack|}}
+                <div class="form-group">
+                    <label class="apsm-label">{{portPack.name}}</label>
+                    <input class="apsm-input apsm-portInput" type="checkbox" data-id="{{portPack.id}}">
+                    <p class="apsm-hint">{{localize "visual-novel-reverse.assetMenu.portCount"}} - {{portPack.count}}</p>
+                </div>
+            {{/each}}
+        </div>
+    {{/if}}
+    <button type="submit" class="apsm-submit-button">{{localize "visual-novel-reverse.assetMenu.submit"}}</button>
+</form>

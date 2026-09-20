@@ -1,0 +1,98 @@
+<div id="vn-foreground-appPart" style="pointer-events: none !important;">
+    {{!-- Кнопки --}}
+    <div data-action="toggleUI" class="vn-corner-button" style="{{#unless hideUI}}display: none;{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.unhideUI"}}"></div>
+    <div id="vn-foreground" class="{{foregroundClass}}" style="pointer-events: none !important;">
+        <div class="vn-buttons-container" style="display: contents;">
+            {{!-- Соты --}}
+            <div class="vn-honeycomb flexcol" {{#unless shownElements.honeycomb}}style="display: none;"{{/unless}}>
+                <div class="vn-honeycomb-element flexrow">
+                    <div data-action="changeBackground" class="vn-round-button{{#unless shownElements.locationChanges}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.changeBackground"}}"><i class="fa-solid fa-arrows-rotate vn-icon-button"></i></div>
+                    <div data-action="openSettingsMenu" class="vn-round-button{{#unless isGM}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.settings-menu"}}"><i class="fa-solid fa-gear vn-icon-button"></i></div>
+                </div>
+                <div class="vn-honeycomb-element flexrow">
+                    <div data-action="toggleEditMode" class="vn-round-button{{#unless shownElements.editWindow}} vn-disabled{{/unless}}{{#if editMode}} vn-hlight{{/if}}" data-tooltip="{{localize "visual-novel-reverse.buttons.edit"}}"><i class="fa-solid fa-wrench vn-icon-button"></i></div>
+                    <div id="vn-linkChanges-button" data-action="toggleLinkChanges" class="vn-round-button{{#unless shownElements.locationChanges}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.linkChanges"}}"><i class="fa-solid {{#if linkChanges}}fa-link{{else}}fa-link-slash{{/if}} vn-icon-button"></i></div>
+                    <div data-action="resetChanges" class="vn-round-button{{#unless shownElements.locationChanges}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.backup"}}"><i class="fa-solid fa-reply-all vn-icon-button"></i></div>
+                </div>
+                <div class="vn-honeycomb-element flexrow">
+                    <div data-action="epicRolls" class="vn-round-button{{#unless (and isGM hasEpicRoll)}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.epicRoll"}}"><i class="fa-solid fa-dice vn-icon-button"></i></div>
+                    <div data-action="effectsWindow" class="vn-round-button{{#unless isGM}} vn-disabled{{/unless}}" data-tooltip="{{localize "visual-novel-reverse.buttons.effects"}}"><i class="fa-solid fa-wand-sparkles vn-icon-button" style="font-weight: 600 !important;"></i></div>
+                </div>
+                {{#if showHintButton}}
+                    <div class="vn-honeycomb-element flexrow">
+                        <div data-action="mainGuideHint" class="vn-round-button" data-tooltip="{{localize "visual-novel-reverse.buttons.hint"}}"><i class="fa-solid fa-question vn-icon-button" style="color: #c9ffbc;"></i></div>
+                    </div>
+                {{/if}}
+            </div>
+            {{!-- Правый верхний угол --}}
+            <div class="vn-back-buttons-container flexcol" style="top: 20px; right: 20px;">
+                <div class="vn-selector-container flexrow" style="flex-direction: row-reverse; margin-bottom: 10px">
+                    <div data-action="selectorToggle" class="vn-mini-button" data-tooltip="{{localize "visual-novel-reverse.buttons.selector"}}"><i class="fa-solid fa-{{#if selectorOpen}}caret-right{{else}}caret-left{{/if}} vn-icon-button"></i></div>
+                    <div class="vn-selector-body" style="display: {{#if selectorOpen}}flex{{else}}none{{/if}}">
+                        {{#each selectors as |selector|}}
+                            <div class="vn-selector-item" data-action="selectorButtons" style="{{#unless selector.active}}display: none;{{/unless}}" data-tooltip="{{selector.name}}" data-type="{{selector.type}}"><i class="fa-solid fa-{{selector.icon}} vn-request-icon"></i></div>
+                        {{/each}}
+                    </div>
+                </div>
+                <div class="vn-player-list-container flexrow" style="flex-direction: row-reverse;">
+                    <div id="vn-player-list-open" data-action="togglePlayerList" class="vn-mini-button{{playerListGlow}}" data-tooltip="{{localize "visual-novel-reverse.buttons.player-list"}}"><i class="fa-solid fa-{{#if playerListOpen}}caret-right{{else}}caret-left{{/if}} vn-icon-button"></i></div>
+                    <div id="vn-player-list-body" class="vn-player-list-body" style="display: {{#if playerListOpen}}flex{{else}}none{{/if}}">
+                        {{#each players as |player|}}
+                            <li class="player flexrow" data-user-id="{{player.id}}" data-action="playerListConMenu">
+                                <span class="player-active {{#if player.hidden}}inactive" style="background: #333333{{else}}active" style="background: {{player.color}}{{/if}}; border: 1px solid"></span>
+                                <span class="player-name" data-tooltip="{{player.name}}{{#if (or player.hidden (not player.active))}}{{localize "visual-novel-reverse.placeholders.hide"}}{{/if}}" style="color: #{{#if player.active}}56d905{{else}}fd6d07{{/if}};">{{player.name}}</span>
+                            </li>
+                        {{/each}}
+                        {{#if shownElements.displayControl}}
+                            <div class="vn-player-list-showForAll" data-action="showPlayerListForAll">
+                                <span>{{localize "visual-novel-reverse.contextmenu.showForAll"}}</span>
+                            </div>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+            {{!-- Левый верхний угол --}}
+            <div class="vn-back-buttons-container flexrow" style="top: 20px; left: 20px;">
+                <div data-action="hideVN" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.hide"}}"><i class="fa-solid fa-eye-slash vn-icon-button"></i></div>
+                <div data-action="openActorSheet" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.actor"}}"><i class="fa-solid fa-user vn-icon-button"></i></div>
+                <div data-action="toggleUI" data-type="hide" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.hideUI"}}"{{#unless hideBackAndUiButtons}} style="display: none;"{{/unless}}><i class="fa-solid fa-tv vn-icon-button"></i></div>
+                <div data-action="hideBack" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.hideBack"}}"{{#unless hideBackAndUiButtons}} style="display: none;"{{/unless}}><i class="fa-solid fa-image vn-icon-button" style="font-weight: {{#if hideBack}}300{{else}}800{{/if}} !important;"></i></div>
+                <div data-action="discordMenu" class="vn-square-button {{discordColorClass}}" data-tooltip="{{localize "visual-novel-reverse.buttons.discordMenu"}}" {{#unless canSeeDiscordMenu}}style="display: none;"{{/unless}}><i class="fa-brands fa-discord vn-icon-button"></i></div>
+            </div>
+            {{!-- Полоски выбора спрайтов "Активных персонажей" - позиционируются на фиксированном расстоянии от
+                 угловых кластеров кнопок (левый: под "Левым верхним углом", правый - зеркально под правым) --}}
+            {{#if spriteStripLeft}}
+                <div class="vn-sprite-strip vn-sprite-strip-left">
+                    {{#each spriteStripLeft.spriteImages as |sprite|}}
+                        <div class="vn-sprite-thumb{{#if (eq sprite.img ../spriteStripLeft.activeSprite)}} vn-sprite-active{{/if}}" data-action="spriteSelect" data-pos="{{../spriteStripLeft.pos}}" data-side="{{../spriteStripLeft.side}}" data-src="{{sprite.img}}" data-tooltip="{{sprite.tooltip}}">
+                            <img src="{{sprite.img}}"/>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/if}}
+            {{#if spriteStripRight}}
+                <div class="vn-sprite-strip vn-sprite-strip-right">
+                    {{#each spriteStripRight.spriteImages as |sprite|}}
+                        <div class="vn-sprite-thumb{{#if (eq sprite.img ../spriteStripRight.activeSprite)}} vn-sprite-active{{/if}}" data-action="spriteSelect" data-pos="{{../spriteStripRight.pos}}" data-side="{{../spriteStripRight.side}}" data-src="{{sprite.img}}" data-tooltip="{{sprite.tooltip}}">
+                            <img src="{{sprite.img}}"/>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/if}}
+            {{!-- Левый нижний угол --}}
+            <div class="vn-back-buttons-container flexrow" style="bottom: 20px; left: 20px;{{#unless shownElements.requests}} display: none;{{/unless}}">
+                <div data-action="createRequest" data-level="1" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.requestFirst"}}"><i class="fa-regular fa-hand vn-request-icon"></i></div>
+                <div data-action="createRequest" data-level="2" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.requestSecond"}}"><i class="fa-solid fa-hand vn-request-icon"></i></div>
+                <div data-action="createRequest" data-level="3" class="vn-square-button" data-tooltip="{{localize "visual-novel-reverse.buttons.requestThird"}}"><i class="fa-solid fa-hand-sparkles vn-request-icon"></i></div>
+            </div>
+            <div id="vn-request-body" class="vn-request-body flexrow" style="bottom: 0; left: 215px;">
+                {{#each requests as |request|}}
+                    <div class="vn-request-container {{editWindowClass}}" data-action="requestClick" data-id="{{request.id}}" data-charid="{{request.charId}}">
+                        <img src="{{request.img}}"/>
+                        <img class="vn-back-request-img vn-req-level-{{request.level}}" src="modules/visual-novel-reverse/templates/assets/request{{request.level}}.webp"/>
+                    </div>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+</div>

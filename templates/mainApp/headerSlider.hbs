@@ -1,0 +1,90 @@
+<div id="vn-up" class="{{headerClass}}" style="{{#unless activeElements.headerSlider}} display: none;{{/unless}}">
+    <div class="vn-header-slider" id="vn-header" style="scale: {{scale.headerSlider}}%; left: {{offset.headerSliderX}}%; top: {{offset.headerSliderY}}%;">
+        {{!-- Мини-очередь --}}
+        {{#if shownElements.miniOrder}}
+            <div class="vn-mini-order-body">
+                <div class="vn-mo-left">
+                    {{#each _order.left as |orderElement|}}
+                        <div class="vn-mo-item" data-action="deletePortraitFromOrder" data-side="left" data-id="{{orderElement.id}}" data-index="{{@index}}" data-tooltip="{{orderElement.name}}"{{#unless orderElement.img}} style="display: none;"{{/unless}}>
+                            <img src="{{orderElement.img}}">
+                        </div>
+                    {{/each}}
+                </div>
+                <div class="vn-mo-right">
+                    {{#each _order.right as |orderElement|}}
+                        <div class="vn-mo-item" data-action="deletePortraitFromOrder" data-side="right" data-id="{{orderElement.id}}" data-index="{{@index}}" data-tooltip="{{orderElement.name}}"{{#unless orderElement.img}} style="display: none;"{{/unless}}>
+                            <img src="{{orderElement.img}}">
+                        </div>
+                    {{/each}}
+                </div>
+            </div>
+        {{/if}}
+        {{!-- Изображение (фон) верхной плашки --}}
+        <img class="vn-header" src="{{headerImg}}"/>
+        <div class="vn-header-content flexrow">
+            {{!-- Текущая локация (город/здание/место) --}}
+            {{#if activeElements.locName}}
+                <div class="vn-current-location" data-type="location" data-action="locationClick"{{#unless activeElements.locName}} style="display: none;"{{/unless}}>
+                    <div id="vn-current-location-body" class="vn-current-location-body" data-tooltip="{{localize "visual-novel-reverse.header.currentLocation"}}">
+                        <span style="font-size: 1vw; font-family: '{{headerFont}}';">{{locationName}}</span>
+                    </div>
+                </div>
+            {{/if}}
+            {{!-- Родительская локация (страна/регион) --}}
+            {{#if activeElements.parLocName}}
+                <div class="vn-parent-location" data-type="parent" data-action="locationClick"{{#unless activeElements.parLocName}} style="display: none;"{{/unless}}>
+                    <div id="vn-parent-location-body" class="vn-parent-location-body" data-tooltip="{{localize "visual-novel-reverse.header.parentLocation"}}">
+                        <span style="font-size: 1vw; font-family: '{{headerFont}}';">{{parentLocation}}</span>
+                        {{!-- <span style="font-size: {{parentLocationSize}}vw; font-family: '{{headerFont}}';">{{parentLocation}}</span> --}}
+                    </div>
+                </div>
+            {{/if}}
+            {{!-- Время --}}
+            {{#if activeElements.clock}}
+                <div id="vn-time" data-action="headerClockClick" class="vn-time-body"{{#unless activeElements.clock}} style="display: none;"{{/unless}}>
+                    <span class="vn-clock" data-tooltip="{{#if editMode}}{{localize "visual-novel-reverse.header.editTime"}}{{else}}{{localize "visual-novel-reverse.header.viewTime"}}{{/if}}">{{time}}</span>
+                    <div id="vn-clock-dropdown" class="vn-clock-dropdown flexrow">
+                        <div class="vn-clock-setting flexrow">
+                            {{#each timeNumbers as |number index|}}
+                                <div class="vn-clock-number-body flexcol">
+                                    {{#unless (eq number ":")}}<div class="vn-clock-button" data-action="timeButtons" data-type="plus" data-index="{{index}}"><i class="fa-solid fa-plus"></i></div>{{/unless}}
+                                    <span class="vn-clock-number">{{number}}</span>
+                                    {{#unless (eq number ":")}}<div class="vn-clock-button" data-action="timeButtons" data-type="minus" data-index="{{index}}"><i class="fa-solid fa-minus"></i></div>{{/unless}}
+                                </div>
+                            {{/each}}
+                        </div>
+                        <div class="flexcol" style="flex: 0; min-width: 25px">
+                            <div class="vn-clock-confirm-button" data-action="confirmTimeUpdates" data-tooltip="{{localize "visual-novel-reverse.buttons.confirm"}}"><i class="fa-solid fa-check"></i></div>
+                            <div class="vn-clock-reset-button" data-action="cancelTimeUpdates" data-tooltip="{{localize "visual-novel-reverse.buttons.reset"}}"><i class="fa-solid fa-rotate-left"></i></div>
+                        </div>
+                    </div>
+                </div>
+            {{/if}}
+            {{!-- Погода --}}
+            {{#if activeElements.weather}}
+                <div id="vn-weather" class="vn-weather-body" data-action="weatherClick" data-tooltip="{{weather.name}}" data-id="{{weather.id}}"{{#unless activeElements.weather}} style="display: none;"{{/unless}}>
+                    <i class="{{weather.icon}} fa-solid vn-chosen-weather"></i>
+                    <div class="vn-weather-dropdown flexcol" style="display: none">
+                        <div class="vn-weather-option" data-id="new" data-tooltip="{{localize "visual-novel-reverse.header.weatherTooltip"}}">
+                            <i class="fas fa-plus"></i>
+                            <span>{{localize "visual-novel-reverse.header.newWeather"}}</span>
+                        </div>
+                        {{#each weatherList as |this|}}
+                            <div class="vn-weather-option" data-id="{{this.id}}" data-tooltip="{{localize "visual-novel-reverse.header.weatherTooltip"}}">
+                                <i class="{{this.icon}}"></i>
+                                <span>{{this.name}}</span>
+                            </div>
+                        {{/each}}
+                    </div>
+                </div>
+            {{/if}}
+            {{!-- Температура --}}
+            {{#if activeElements.temperature}}
+                <div id="vn-temperature" class="vn-temperature-body" data-tooltip="{{temperature}}°C"{{#unless activeElements.temperature}} style="display: none;"{{/unless}}>
+                    <i class="fas fa-temperature-low vn-thermometer" style="color: {{temperatureColor}}"></i>
+                        <input id="vn-edit-temperature" type="range" {{#unless shownElements.locationSubChanges}}disabled{{/unless}} class="vn-temperature-slider{{#unless editMode}} vn-hidden{{/unless}}" name="temperature" value="{{temperature}}" min="-100" max="100" step="1">
+                </div>
+            {{/if}}
+        </div>
+    </div>
+</div>

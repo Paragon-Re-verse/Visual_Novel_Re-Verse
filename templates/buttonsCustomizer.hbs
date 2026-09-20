@@ -1,0 +1,41 @@
+<div class="vn-buttons-customizer">
+    <div class="vbc-header">
+
+    </div>
+    <div class="vbc-list-body">
+        {{#each buttons}}
+        <div class="vbc-list-item">
+            <i class="vbc-item-icon fas fa-{{this.icon}}"></i>
+            <input type="text" data-key="name" value="{{this.name}}">
+            <span class="vbc-executeAs-text">{{localize "visual-novel-reverse.buttonsCustomizer.executeAs"}}</span>
+            <select data-key="executor" value="{{this.executor}}">
+                <option value="player">{{localize "visual-novel-reverse.buttonsCustomizer.executeAsPlayer"}}</option>    
+                <option value="gm">{{localize "visual-novel-reverse.buttonsCustomizer.executeAsGM"}}</option>
+            </select>
+            <span class="vbc-buttonAction-text">{{localize "visual-novel-reverse.buttonsCustomizer.buttonAction"}}</span>
+            <select data-key="action" value="{{this.action}}">
+                <option value="macros">{{localize "visual-novel-reverse.buttonsCustomizer.runsMacros"}}</option>    
+                <option value="command">{{localize "visual-novel-reverse.buttonsCustomizer.executeCommand"}}</option>
+                <option value="dataAction">{{localize "visual-novel-reverse.buttonsCustomizer.dataAction"}}</option>
+            </select>
+            {{#if (eq this.action "macros")}}
+                <div class="vbc-macros-box">
+                    {{#if this.macrosName}}
+                        <div class="vbc-macros-item"></div> {{!-- плейсхолдер --}}
+                    {{/if}}
+                </div>
+            {{else if (eq this.action "command")}}
+                <input type="text" data-key="command" value="{{this.command}}">
+            {{else if (eq this.action "dataAction")}}
+                <select data-key="dataAction" value="{{this.dataAction}}">
+                    {{#each ../dataActions}}
+                        <option value="{{this}}">{{localize (concat "visual-novel-reverse.dataActions." this)}}</option>
+                    {{/each}}
+                </select>
+            {{/if}}
+            <button type="button" class="vbc-delete-button"><i class="fas fa-trash"></i></button>
+            <button type="button" class="vbc-duplicate-button"><i class="fas fa-clone"></i></button>
+        </div>
+        {{/each}}
+    </div>
+</div>

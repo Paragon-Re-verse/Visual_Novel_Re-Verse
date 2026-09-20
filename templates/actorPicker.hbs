@@ -1,0 +1,61 @@
+<form id="vn-actor-picker" class="flexcol">
+
+    <div class="ac-portraits flexrow" style="margin-top: 3px;">
+        <div class="flex1"></div>
+            {{#each activeSpeakers.left as |speaker|}}
+                <div data-pos="{{speaker.pos}}" data-id="{{speaker.id}}" class="vn-ac-slot{{#if (eq ../highlightEl speaker.pos)}} vn-hlight{{/if}}">
+                    <img data-pos="{{speaker.pos}}" src="{{speaker.img}}" style="transform:scaleX(-1);{{#unless speaker.img}} display: none;{{/unless}}"/>
+                </div>
+            {{/each}}
+            <div class="ac-mid-border"></div>
+            {{#each activeSpeakers.right as |speaker|}}
+                <div data-pos="{{speaker.pos}}" data-id="{{speaker.id}}" class="vn-ac-slot{{#if (eq ../highlightEl speaker.pos)}} vn-hlight{{/if}}">
+                    <img data-pos="{{speaker.pos}}" src="{{speaker.img}}"{{#unless speaker.img}} style="display: none;"{{/unless}}/>
+                </div>
+            {{/each}}
+        <div class="flex1"></div>
+    </div>
+
+    <div class="ac-body flexrow">
+        <div class="ac-filter-body">    
+            {{#each filters as |category|}}
+                <div class="ac-filter">
+                    <h3 class="ac-filter-title">{{category.name}}</h3>
+                    {{#each category.list as |filter|}}
+                        <div class="ac-filter-option">
+                            <input type="checkbox" id="{{filter.id}}" data-name="{{filter.name}}" data-cat="{{category.name}}">
+                            <label for="{{filter.id}}">{{filter.name}}</label>
+                        </div>
+                    {{/each}}
+                </div>
+            {{/each}}
+        </div>
+        <div class="ac-aList-body flexcol">
+            <input type="text" class="ac-search-input flex0" placeholder="{{localize "visual-novel-reverse.actorPicker.search"}}" value="{{filterText}}"/>
+            <ul class="ac-actor-list">
+                {{#each portraits as |actor|}}
+                    <li class="flexrow" data-id="{{actor.id}}">
+                        <img class="flex0"src="{{actor.img}}"/>
+                        <div class="ac-actor-text">
+                            <h4 class="ac-actor-name">{{actor.name}}</span>
+                            <h4 class="ac-actor-title">{{actor.title}}</span>
+                        </div>
+                        <div class="ac-buttons-container">
+                            {{#if actor.hasActor}}<button type="openActor" class="ac-open-button" data-tooltip="{{localize "visual-novel-reverse.actorPicker.openActor"}}"><i class="fas fa-user"></i></button>{{/if}}
+                            <button type="editPortrait" class="ac-edit-button" data-tooltip="{{localize "visual-novel-reverse.actorPicker.editPortrait"}}"><i class="fas fa-pencil"></i></button>
+                            <button type="deletePortrait" class="ac-delete-button" data-tooltip="{{localize "visual-novel-reverse.actorPicker.deletePortrait"}}"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </li>
+                {{/each}}
+            </ul>
+        </div>
+    </div>
+
+    <div class="ac-stealth-container">
+        <div class="ac-stealth-extButton">
+            <i class="ac-eye fas fa-eye" style="display: block" data-tooltip="{{localize "visual-novel-reverse.actorPicker.stealthTooltip"}}"></i>
+            <i class="ac-question fas fa-circle-question" style="display: none" data-tooltip="{{localize "visual-novel-reverse.actorPicker.stealthTooltip"}}"></i>
+        </div>
+    </div>
+
+</form>

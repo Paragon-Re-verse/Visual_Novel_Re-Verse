@@ -1,0 +1,43 @@
+{{#if (eq side "left")}}
+   <div id="vn-{{side}}" class="{{sliderClass}}" style="scale: {{scale.leftSlider}}%; {{side}}: {{offset.leftSliderX}}%; top: {{offset.leftSliderY}}%;{{#unless activeElements.leftSlider}} display: none;{{/unless}}">
+        {{!-- Изображения слайдера (фон и верхняя часть ) --}}
+        <div>
+            <img id="vn-{{side}}-slide-back" class="vn-slide-back" src="{{sliderBack}}"/>
+            <img id="vn-{{side}}-slide-top" class="vn-slide-top" src="{{slider}}"/>
+        </div>
+        {{!-- Портреты в левой части --}}
+        <div id="vn-{{side}}-portraits" class="flexrow" style="height: 0;width: 87%;{{side}}: 0;position: absolute;">
+
+            {{!-- Портреты --}}
+
+        </div>
+        {{!-- Текст слайдера --}}
+        <div id="vn-{{side}}-text" class="vn-text-box"{{#unless activeElements.leftNameBox}} style="display: none;"{{/unless}}>
+            {{!-- Имя --}}
+            <span class="vn-name" data-action="nameAndTitleContextMenu" data-side="{{side}}" data-type="Name"{{#unless activeElements.leftName}} style="display: none;"{{/unless}} data-tooltip="{{localize "visual-novel-reverse.buttons.hideName"}}">{{name}}</span>
+            {{!-- Титул/звание/т.п. --}}
+            <span class="vn-title" data-action="nameAndTitleContextMenu" data-side="{{side}}" data-type="Title"{{#unless activeElements.leftTitle}} style="display: none;"{{/unless}} data-tooltip="{{localize "visual-novel-reverse.buttons.hideTitle"}}">{{title}}</span>
+        </div>
+    </div>
+{{else}}
+    <div id="vn-{{side}}" class="{{sliderClass}}" style="scale: {{scale.rightSlider}}%; {{side}}: {{offset.rightSliderX}}%; top: {{offset.rightSliderY}}%;{{#unless activeElements.rightSlider}} display: none;{{/unless}}">
+        {{!-- Изображения слайдера (фон и верхняя часть ) --}}
+        <div>
+            <img id="vn-{{side}}-slide-back" class="vn-slide-back" src="{{sliderBack}}" style="right: 0"/>
+            <img id="vn-{{side}}-slide-top" class="vn-slide-top" src="{{slider}}" style="right: 0"/>
+        </div>
+        {{!-- Портреты в левой части --}}
+        <div id="vn-{{side}}-portraits" class="flexrow" style="height: 0;width: 87%;{{side}}: 0;position: absolute;">
+
+            {{!-- Портреты --}}
+
+        </div>
+        {{!-- Текст слайдера --}}
+        <div id="vn-{{side}}-text" class="vn-text-box"{{#unless activeElements.rightNameBox}} style="display: none;"{{/unless}}>
+            {{!-- Имя --}}
+            <span class="vn-name"data-action="nameAndTitleContextMenu" data-side="{{side}}" data-type="Name"{{#unless activeElements.rightName}} style="display: none;"{{/unless}} data-tooltip="{{localize "visual-novel-reverse.buttons.hideName"}}">{{name}}</span>
+            {{!-- Титул/звание/т.п. --}}
+            <span class="vn-title"data-action="nameAndTitleContextMenu" data-side="{{side}}" data-type="Title"{{#unless activeElements.rightTitle}} style="display: none;"{{/unless}} data-tooltip="{{localize "visual-novel-reverse.buttons.hideTitle"}}">{{title}}</span>
+        </div>
+    </div>
+{{/if}}

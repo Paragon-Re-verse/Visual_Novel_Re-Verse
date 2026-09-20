@@ -1,0 +1,52 @@
+<div class="afm-container">
+    <div class="afm-add-category-row">
+        <input type="text" class="afm-new-category-input" placeholder="{{localize "visual-novel-reverse.actorFoldersManager.newCategoryPlaceholder"}}">
+        <button type="button" class="afm-add-category">
+            <i class="fas fa-plus"></i> {{localize "visual-novel-reverse.actorFoldersManager.addCategoryButton"}}
+        </button>
+    </div>
+    <div class="afm-categories-list">
+        {{#each categories as |category|}}
+            <div class="afm-category" data-cat-id="{{category.id}}">
+                <div class="afm-category-header">
+                    <span class="afm-category-name">{{category.name}}</span>
+                    <div class="afm-category-actions">
+                        <i class="fas fa-folder-plus afm-add-folder" title="{{localize "visual-novel-reverse.actorFoldersManager.addFolderTooltip"}}"></i>
+                        <i class="fas fa-pen afm-rename-category" title="{{localize "visual-novel-reverse.actorFoldersManager.renameTooltip"}}"></i>
+                        <i class="fas fa-trash afm-delete-category" title="{{localize "visual-novel-reverse.actorFoldersManager.deleteTooltip"}}"></i>
+                    </div>
+                </div>
+                <div class="afm-folders-list">
+                    {{#each category.folders as |folder|}}
+                        <div class="afm-folder" data-folder-id="{{folder.id}}">
+                            <div class="afm-folder-header">
+                                <i class="fas fa-caret-right afm-folder-caret"></i>
+                                <span class="afm-folder-name">{{folder.name}}</span>
+                                <span class="afm-folder-count">({{folder.actors.length}})</span>
+                                <div class="afm-folder-actions">
+                                    <i class="fas fa-pen afm-rename-folder" title="{{localize "visual-novel-reverse.actorFoldersManager.renameTooltip"}}"></i>
+                                    <i class="fas fa-trash afm-delete-folder" title="{{localize "visual-novel-reverse.actorFoldersManager.deleteTooltip"}}"></i>
+                                </div>
+                            </div>
+                            <div class="afm-folder-actors">
+                                {{#each folder.actors as |actor|}}
+                                    <div class="afm-actor-row" data-id="{{actor.id}}">
+                                        <img src="{{actor.img}}"/>
+                                        <span>{{actor.name}}</span>
+                                        <i class="fas fa-xmark afm-remove-actor" title="{{localize "visual-novel-reverse.actorFoldersManager.removeActorTooltip"}}"></i>
+                                    </div>
+                                {{else}}
+                                    <div class="afm-folder-empty">{{localize "visual-novel-reverse.actorFoldersManager.folderEmpty"}}</div>
+                                {{/each}}
+                            </div>
+                        </div>
+                    {{else}}
+                        <div class="afm-category-empty">{{localize "visual-novel-reverse.actorFoldersManager.categoryEmpty"}}</div>
+                    {{/each}}
+                </div>
+            </div>
+        {{else}}
+            <div class="afm-empty-state">{{localize "visual-novel-reverse.actorFoldersManager.noCategoriesYet"}}</div>
+        {{/each}}
+    </div>
+</div>
