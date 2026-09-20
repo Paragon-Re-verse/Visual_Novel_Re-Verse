@@ -1,0 +1,32 @@
+<div class="faction-relations-reverse-app">
+  <header class="frel-toolbar">
+    <div class="frel-tabs">
+      <button type="button" class="frel-tab" data-view="factions">
+        <i class="fa-solid fa-hexagon-nodes"></i> {{localize "FACTIONREL.TabFactions"}}
+      </button>
+    </div>
+    <div class="frel-search-wrap">
+      <input type="text" class="frel-search" placeholder="{{localize 'FACTIONREL.SearchPlaceholder'}}" autocomplete="off">
+      <div class="frel-search-results" style="display:none;"></div>
+    </div>
+    <div class="frel-actions">
+      {{#if isGM}}
+      <button type="button" class="frel-btn" data-action="addNode">
+        <i class="fa-solid fa-plus"></i> {{localize "FACTIONREL.AddNode"}}
+      </button>
+      <button type="button" class="frel-btn frel-link-toggle" data-action="toggleLinkMode" title="{{localize 'FACTIONREL.LinkMode'}}">
+        <i class="fa-solid fa-link"></i> {{localize "FACTIONREL.Links"}}
+      </button>
+      {{/if}}
+      <button type="button" class="frel-btn" data-action="resetView" title="{{localize 'FACTIONREL.ResetView'}}">
+        <i class="fa-solid fa-compress"></i>
+      </button>
+    </div>
+  </header>
+  <div class="frel-canvas">
+    <div class="frel-world">
+      <svg class="frel-edges"></svg>
+      <div class="frel-nodes"></div>
+    </div>
+  </div>
+</div>
