@@ -1,7 +1,7 @@
 {
   "title": "Visual Novel Re:Verse",
   "description": "This module allows you to transform your social scenes using the Visual Novels Dialogues window in the style of visual novels or JRPGs, but with special functionality designed for comfortable D&amp;D, or other TTRPGs sessions.",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "compatibility": {
     "minimum": "12",
     "verified": "13"
