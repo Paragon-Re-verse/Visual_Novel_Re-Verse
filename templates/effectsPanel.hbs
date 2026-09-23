@@ -1,9 +1,9 @@
 <form class="vn-fx-panel flexcol">
 
     <div class="vn-fx-section">
-        <label class="vn-fx-label">Цель эффекта</label>
+        <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.targetLabel"}}</label>
         <select class="vn-fx-target-select">
-            <option value="all">Все активные персонажи</option>
+            <option value="all">{{localize "visual-novel-reverse.effectsPanel.allActiveCharacters"}}</option>
             {{#each targets as |t|}}
                 <option value="{{t.pos}}">{{t.name}}</option>
             {{/each}}
@@ -11,37 +11,37 @@
     </div>
 
     <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-shake"><i class="fas fa-hand-fist"></i> Тряска</button>
+        <button type="button" class="vn-fx-shake"><i class="fas fa-hand-fist"></i> {{localize "visual-novel-reverse.effectsPanel.shake"}}</button>
     </div>
 
     <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-flash-light"><i class="fas fa-sun"></i> Вспышка света</button>
-        <button type="button" class="vn-fx-flash-dark"><i class="fas fa-moon"></i> Вспышка тьмы</button>
+        <button type="button" class="vn-fx-flash-light"><i class="fas fa-sun"></i> {{localize "visual-novel-reverse.effectsPanel.flashLight"}}</button>
+        <button type="button" class="vn-fx-flash-dark"><i class="fas fa-moon"></i> {{localize "visual-novel-reverse.effectsPanel.flashDark"}}</button>
     </div>
 
     <hr/>
 
     <div class="vn-fx-section vn-fx-row">
         <button type="button" class="vn-fx-toggle-darken{{#if darkenBack}} vn-fx-active{{/if}}">
-            <i class="fas fa-circle-half-stroke"></i> Затемнить фон
+            <i class="fas fa-circle-half-stroke"></i> {{localize "visual-novel-reverse.effectsPanel.darkenBackground"}}
         </button>
         <button type="button" class="vn-fx-toggle-row{{#if rowMode}} vn-fx-active{{/if}}">
-            <i class="fas fa-grip-lines"></i> Режим ряда
+            <i class="fas fa-grip-lines"></i> {{localize "visual-novel-reverse.effectsPanel.rowMode"}}
         </button>
     </div>
 
     <div class="vn-fx-section vn-fx-row">
         <button type="button" class="vn-fx-bgscroll-toggle{{#if bgScroll}} vn-fx-active{{/if}}">
-            <i class="fas fa-arrows-left-right"></i> Прокрутка фона
+            <i class="fas fa-arrows-left-right"></i> {{localize "visual-novel-reverse.effectsPanel.scrollBackground"}}
         </button>
         <button type="button" class="vn-fx-blur-toggle{{#if bgBlur}} vn-fx-active{{/if}}">
-            <i class="fas fa-droplet"></i> Блюр фона
+            <i class="fas fa-droplet"></i> {{localize "visual-novel-reverse.effectsPanel.blurBackground"}}
         </button>
     </div>
 
     <div class="vn-fx-section vn-fx-row">
         <button type="button" class="vn-fx-narrative">
-            <i class="fas fa-align-center"></i> Нарратив
+            <i class="fas fa-align-center"></i> {{localize "visual-novel-reverse.effectsPanel.narrative"}}
         </button>
     </div>
 
@@ -49,10 +49,10 @@
 
     <div class="vn-fx-section vn-fx-row">
         <button type="button" class="vn-fx-toggle-lockexit{{#if lockExit}} vn-fx-active{{/if}}">
-            <i class="fas fa-lock"></i> Заблокировать выход игрокам
+            <i class="fas fa-lock"></i> {{localize "visual-novel-reverse.effectsPanel.lockExitForPlayers"}}
         </button>
     </div>
 
-    <p class="vn-fx-hint">Тряска и вспышки применяются к выбранной выше цели. Затемнение фона, режим ряда, прокрутка фона, блюр фона и блокировка выхода - это переключатели, общие для всех игроков.</p>
+    <p class="vn-fx-hint">{{localize "visual-novel-reverse.effectsPanel.hint"}}</p>
 
 </form>

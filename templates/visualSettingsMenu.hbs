@@ -59,7 +59,7 @@
                                 <div class="vsm-slots-line" style="width: calc({{data.lineWidth.left}}% - 20px);"></div>
                                 {{!-- Количество слотов --}}
                                 <div class="vsm-slots">
-                                    <input class="vsm-slots-input" type="text" data-key="slotCount.left" value="{{slotCount.left}}" placeholder="{{data.slotCountPlaceholder}}"/>
+                                    <input class="vsm-slots-input" type="number" min="1" max="5" step="1" data-key="slotCount.left" value="{{slotCount.left}}" placeholder="{{data.slotCountPlaceholder}}"/>
                                 </div>
                                 <div class="vsm-portraits-container flexrow">
                                     {{#each pFields.left as |pField|}}
@@ -104,7 +104,7 @@
                                 <div class="vsm-slots-line" style="width: calc({{data.lineWidth.right}}% - 20px);"></div>
                                 {{!-- Количество слотов --}}
                                 <div class="vsm-slots">
-                                    <input class="vsm-slots-input" type="text" data-key="slotCount.right" value="{{slotCount.right}}" placeholder="{{data.slotCountPlaceholder}}"/>
+                                    <input class="vsm-slots-input" type="number" min="1" max="5" step="1" data-key="slotCount.right" value="{{slotCount.right}}" placeholder="{{data.slotCountPlaceholder}}"/>
                                 </div>
                                 <div class="vsm-portraits-container flexrow">
                                     {{#each pFields.right as |pField|}}
@@ -141,9 +141,8 @@
                         <i class="fas fa-save"></i>
                         <span>{{localize "visual-novel-reverse.visualSettingsMenu.uiSaveButton"}}</span>
                     </div>
-                    <div class="vsm-buttom-button" data-app="detailUI">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.openButton"}}</div>
-                    {{!-- <div class="vsm-buttom-button" style="right: calc(50% + 15px)" data-app="detailUI">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.openButton"}}</div> --}}
-                    {{!-- <div class="vsm-buttom-button" style="left: calc(50% + 15px)" data-app="buttonsCustomizer">{{localize "visual-novel-reverse.buttonsCustomizer.openButton"}}</div> --}}
+                    <div class="vsm-buttom-button" style="right: calc(50% + 15px)" data-app="detailUI">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.openButton"}}</div>
+                    <div class="vsm-buttom-button" style="left: calc(50% + 15px)" data-app="buttonsCustomizer">{{localize "visual-novel-reverse.buttonsCustomizer.openButton"}}</div>
                 </div>
                 <div class="vsm-preset-list">
                     {{!-- Активный пресет --}}
@@ -195,7 +194,7 @@
                 <div class="vsm-detail-mode" data-mode="{{mode}}">{{localize (concat "visual-novel-reverse.visualSettingsMenu.detailMode." mode)}}</div>
                 {{/each}} --}}
                 <div class="vsm-detail-mode" data-mode="moveSliders">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.moveSliders"}}</div>
-                <div class="vsm-detail-mode" data-mode="none">WIP (again, yea)</div>
+                <div class="vsm-detail-mode" data-mode="none">{{localize "visual-novel-reverse.visualSettingsMenu.detailMode.noneWIP"}}</div>
 
                 <div class="vsm-detail-mode-slider {{data.detailModeBuffer.mode}}"></div>
             </div>
@@ -230,7 +229,7 @@
             <div class="pms-tabs">
                 <div class="pms-tabs-selector">
                     {{#each settingsTab as |tab|}}
-                        <a class="pms-tab-button{{#if (eq ../data.currentTab tab.name)}} pms-choosed{{/if}}" data-tab="{{tab.name}}">{{localize (concat "TYPES.Actor." tab.name)}}</a>
+                        <a class="pms-tab-button{{#if (eq ../data.currentTab tab.name)}} pms-choosed{{/if}}" data-tab="{{tab.name}}">{{tab.label}}</a>
                     {{/each}}
                     <div class="pms-multiCreate-button">
                         <i class="fas fa-clone"></i>
@@ -303,7 +302,7 @@
                             <select data-key="selectedGroup">
                                 {{#each ../settingsTab as |group|}}
                                     {{#unless (eq ../data.currentTab group.name)}}
-                                        <option value="{{group.name}}" {{#if (eq autoSearchData.generalRules.chosenGroup group.name)}}selected{{/if}}>{{localize (concat "TYPES.Actor." group.name)}}</option>
+                                        <option value="{{group.name}}" {{#if (eq autoSearchData.generalRules.chosenGroup group.name)}}selected{{/if}}>{{group.label}}</option>
                                     {{/unless}}
                                 {{/each}}
                             </select>

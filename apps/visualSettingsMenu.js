@@ -2,7 +2,7 @@ import { Constants as C, defaultPortraitSettingsTemplate, quickSettingsUpdate, u
 import { _portraitPartsKeys, VisualNovelDialogues } from '../scripts/main.js';
 import { PresetUIClass } from '../scripts/presetUIClass.js';
 import { openMassPortraitCreator } from './actorPicker.js';
-// import { ButtonsCustomizer } from './buttonsCustomizer.js';
+import { ButtonsCustomizer } from './buttonsCustomizer.js';
 
 // Под-режимы детального режима.
 const vsmDetailsModes = ["moveSliders", "moveButtons", "hideElements"]
@@ -43,6 +43,10 @@ export class VisualSettingsMenu extends FormApplication {
         const hiddenTypes = game.settings.get(C.ID, "hiddenTypes")
         const settingsTab = Actor.TYPES.filter(type => ![...hiddenTypes, "base"].includes(type)).map(t => { return {
             name: t,
+            // Если у стороннего модуля, зарегистрировавшего этот подтип, нет собственной
+            // локализации TYPES.Actor.<module-id>.<subtype> - localize() вернёт сырой ключ как есть.
+            // Показываем вместо него хотя бы последний сегмент подтипа, а не полный дотнотированный ключ.
+            label: game.i18n.translations.TYPES?.Actor?.[t] || t.split(".").pop(),
             autoSearchData: autoPortraitSettings[t]
         }});
 
@@ -60,13 +64,18 @@ export class VisualSettingsMenu extends FormApplication {
 
         // presetArray.forEach((p, i) => {if (!p.hotkey) presetArray[i].hotkey = game.i18n.localize(`${C.ID}.visualSettingsMenu.hotkeyPlaceholder`)})
         const getPFields = (slotCount, masterSlot, side) => {
-            const nums = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"].slice(0, slotCount)
+            // slotCount может прийти как строка из <input type="text"> или как некорректное значение
+            // (NaN, отрицательное, дробное, за пределами задокументированного максимума "до 5") -
+            // без приведения к числу и клампа Array.slice(0, slotCount) даёт неожиданные результаты
+            // (например отрицательное число отсчитывает слоты с конца массива nums)
+            const clampedSlotCount = Math.min(5, Math.max(1, Math.trunc(Number(slotCount)) || 1))
+            const nums = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth"].slice(0, clampedSlotCount)
             return nums.reduce((acc, el, i) => {
                 acc.push({
                     active: (el == masterSlot),
                     key: el,
-                    last: (masterSlot == "Last" && i == slotCount - 1),
-                    lineSide: (i == (slotCount-1) / 2) ? "center" : ((side == "left") == (i < slotCount / 2)) ? "left" : "right"
+                    last: (masterSlot == "Last" && i == clampedSlotCount - 1),
+                    lineSide: (i == (clampedSlotCount-1) / 2) ? "center" : ((side == "left") == (i < clampedSlotCount / 2)) ? "left" : "right"
                 })
                 return acc
             }, [])
@@ -149,7 +158,7 @@ export class VisualSettingsMenu extends FormApplication {
         const techSettingsKeys = ["headerPortraitButton", "makesBackup", "showToolbar", "permaForcedOpen", "portraitFoldersPath", "backgoundFoldersPath", "zIndex"]
         // Modules settings menu
         const modulesSettingsMenus = []
-        const modulesSettingsKeys = ["monkCommonDisplay", "useSimpleCalendar", "advancedRequestsSync", "discordNotifications", "discordActivitySync", "discordAutoConnect", "discordChannelId", "discordHighlightGM"]
+        const modulesSettingsKeys = ["useSimpleCalendar", "advancedRequestsSync", "discordNotifications", "discordActivitySync", "discordAutoConnect", "discordChannelId", "discordHighlightGM"]
         // Effects settings menu (панель "Эффекты" - apps/effectsPanel.js)
         const effectsSettingsMenus = []
         const effectsSettingsKeys = ["flashLightSpeed", "flashDarkSpeed", "bgScrollDirection", "bgScrollLoop", "bgScrollSpeed", "bgBlurStrength", "narrativeTextMode", "narrativeTypeSpeed"]
@@ -184,6 +193,7 @@ export class VisualSettingsMenu extends FormApplication {
                     } else {
                         this.render(true, {left: window.innerWidth * 0.25, top: window.innerHeight * 0.2})
                     }
+                    this.bringToFront()
                 })
             })
         } else {
@@ -193,6 +203,7 @@ export class VisualSettingsMenu extends FormApplication {
                 button.addEventListener('click', (event) => {
                     this.mode = "home"
                     this.render(true, {left: (window.innerWidth - 760) / 2, top: (window.innerHeight - 560) / 2})
+                    this.bringToFront()
                 })
             })
         }
@@ -294,7 +305,6 @@ export class VisualSettingsMenu extends FormApplication {
             html[0].querySelector('.vsm-add-preset')?.addEventListener('click', async (event) => {
                 const newPresetId = await PresetUIClass.addPreset()
                 this.editablePreset = newPresetId
-                await new Promise((resolve) => setTimeout(resolve, 10)) 
                 this.render()
             })
 
@@ -307,12 +317,15 @@ export class VisualSettingsMenu extends FormApplication {
                     if (presetsArray.length == 0) {
                         ui.notifications.error(game.i18n.localize(`${C.ID}.visualSettingsMenu.cannotDeleteTheOnlyOne`))
                     } else {
+                        const confirmed = await Dialog.confirm({
+                            title: game.i18n.localize(`${C.ID}.visualSettingsMenu.deletePresetConfirmTitle`),
+                            content: `<p>${game.i18n.localize(`${C.ID}.visualSettingsMenu.deletePresetConfirmContent`)}</p>`,
+                        })
+                        if (!confirmed) return
                         await PresetUIClass.deletePreset(_id)
                         const newId = presetsArray[0]?.id
                         // Если удаляем активный пресет - ставим активым первый в списке
-                        if (_id == _presetSettings.choosenPreset) PresetUIClass.setPreset(newId)
-
-                        await new Promise((resolve) => setTimeout(resolve, 10))
+                        if (_id == _presetSettings.choosenPreset) await PresetUIClass.setPreset(newId)
 
                         // Если удаляем редактируемый пресет - ставим редактируемым первый в списке
                         if (_id == this.editablePreset) this.editablePreset = newId
@@ -344,7 +357,6 @@ export class VisualSettingsMenu extends FormApplication {
                     if (bufferPresetData) {
                         await PresetUIClass.updatePreset(_id, {...bufferPresetData, id: _id, name: oldData.name, hotkey: oldData.hotkey})
                         ui.notifications.info(game.i18n.localize(`${C.ID}.visualSettingsMenu.pastedPreset`))
-                        await new Promise((resolve) => setTimeout(resolve, 10))
                         this.render()
                     } else {
                         ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noCopiedPreset`))
@@ -358,7 +370,6 @@ export class VisualSettingsMenu extends FormApplication {
                     const _id = event.currentTarget.closest('.vsm-preset').dataset.id
                     if (!_id) return
                     this.editablePreset = _id
-                    await new Promise((resolve) => setTimeout(resolve, 10)) 
                     this.render()
                 })
             })
@@ -368,7 +379,6 @@ export class VisualSettingsMenu extends FormApplication {
                     const _id = event.currentTarget.closest('.vsm-preset').dataset.id
                     if (!_id) return
                     await PresetUIClass.setPreset(_id)
-                    await new Promise((resolve) => setTimeout(resolve, 10))
                     this.render()
                 })
             })
@@ -392,7 +402,7 @@ export class VisualSettingsMenu extends FormApplication {
             uiMenuInputs?.forEach(input => {
                 input.addEventListener('change', (event) => {
                     if (!this.editablePreset) {
-                        ui.notifications.error(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
+                        ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
                         return
                     }
                     const saveButton = html[0].querySelector('.vsm-ui-save-button')
@@ -404,7 +414,7 @@ export class VisualSettingsMenu extends FormApplication {
             // Сохранение пресета UI
             async function savePresetData(html, editablePresetId) {
                 if (!editablePresetId) {
-                    ui.notifications.error(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
+                    ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
                     return
                 }
                 // Собрать данные
@@ -413,9 +423,9 @@ export class VisualSettingsMenu extends FormApplication {
                     const parts = el.dataset.key.split(".")
                     if (!acc[parts[0]]) acc[parts[0]] = {}
 
-                    acc[parts[0]][parts[1]] = 
+                    acc[parts[0]][parts[1]] =
                         parts[0] == "activeElements" ? el.checked :
-                        parts[0] == "slotCount" ? parseInt(el.value) :
+                        parts[0] == "slotCount" ? Math.min(5, Math.max(1, Math.trunc(Number(el.value)) || 1)) :
                         el.value
 
                     return acc
@@ -432,9 +442,7 @@ export class VisualSettingsMenu extends FormApplication {
                 presetData.name = presetEl?.querySelector('.vsm-preset-input')?.value || game.i18n.localize(`${C.ID}.visualSettingsMenu.newPreset`)
 
                 await PresetUIClass.updatePreset(editablePresetId, presetData)
-                await new Promise((resolve) => setTimeout(resolve, 10))
-                // VisualNovelDialogues.instance.render(true)
-                VisualNovelDialogues._render(null, true, true)
+                await VisualNovelDialogues._render(null, true, true)
                 ui.notifications.info(game.i18n.localize(`${C.ID}.visualSettingsMenu.saved`))
             }
             html[0].querySelector('.vsm-ui-save-button')?.addEventListener('click', async (event) => {
@@ -532,7 +540,7 @@ export class VisualSettingsMenu extends FormApplication {
                     document.removeEventListener('mousemove', onMouseMove);
                     document.removeEventListener('mouseup', onMouseUp);
                     if (!editablePresetId) {
-                        ui.notifications.error(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`));
+                        ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`));
                         return;
                     }
                     const saveButton = html[0].querySelector('.vsm-ui-save-button')
@@ -546,9 +554,10 @@ export class VisualSettingsMenu extends FormApplication {
                 if (event.currentTarget.dataset.app == "detailUI") {
                     this.mode = "detailUI"
                     this.render(true, {left: window.innerWidth * 0.4, top: window.innerHeight * 0.6})
+                    this.bringToFront()
                 } else {
-                    // const app = new ButtonsCustomizer()
-                    // app.render(true)
+                    const app = new ButtonsCustomizer()
+                    app.render(true)
                 }
             })
 
@@ -592,7 +601,7 @@ export class VisualSettingsMenu extends FormApplication {
 
                 const editablePresetId = this.editablePreset
                 if (!editablePresetId) {
-                    ui.notifications.error(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
+                    ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
                     return
                 }
                 // Собрать данные
@@ -610,11 +619,7 @@ export class VisualSettingsMenu extends FormApplication {
                 })
 
                 await PresetUIClass.updatePreset(editablePresetId, presetData)
-                // На всякий случай ждём 10мс
-                await new Promise((resolve) => setTimeout(resolve, 10))
-                VisualNovelDialogues._render(null, true, true)
-                // и ещё 10мс ожидания чтобы окно VN успело отререндериться
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                await VisualNovelDialogues._render(null, true, true)
                 this.render()
                 ui.notifications.info(game.i18n.localize(`${C.ID}.visualSettingsMenu.saved`))
 
@@ -623,9 +628,7 @@ export class VisualSettingsMenu extends FormApplication {
             // Отменить изменения
             html.find('.vsm-detailUI-cancel-button').on('click', async () => {
 
-                VisualNovelDialogues._render(["headerSlider", ..._portraitPartsKeys()])
-                // 10мс ожидания чтобы окно VN успело отререндериться
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                await VisualNovelDialogues._render(["headerSlider", ..._portraitPartsKeys()])
                 this.render(true)
 
             })
@@ -634,6 +637,7 @@ export class VisualSettingsMenu extends FormApplication {
             html.find('.vsm-detailUI-close-button').on('click', () => {
                 this.mode = "menuUI"
                 this.render(true, {left: window.innerWidth * 0.05, top: window.innerHeight * 0.1})
+                this.bringToFront()
             })
 
         // Меню настроек автосоздания Портретов
@@ -662,7 +666,7 @@ export class VisualSettingsMenu extends FormApplication {
                                 <div class="form-fields">
                                     <label>
                                         <input id="hiddenTypes-${type}" type="checkbox" name="${type}" ${hiddenTypes.includes(type) ? "checked" : ""}>
-                                        <span for="hiddenTypes-${type}">${translates?.[type] || type}</span>
+                                        <span for="hiddenTypes-${type}">${translates?.[type] || type.split(".").pop()}</span>
                                     </label>
                                 </div>
                             `

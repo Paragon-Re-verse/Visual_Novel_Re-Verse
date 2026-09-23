@@ -199,7 +199,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                     editMode: (settingData.editMode && context.shownElements["editWindow"]),
                     time: getTime(activeLocation.knowTime, settingData),
                     timeNumbers: getTime(true, settingData).split(""),
-                    weather: activeLocation.weather || settingData.weatherList.find(w => w.name == "Неизвестная погода"),
+                    weather: activeLocation.weather || settingData.weatherList[0],
                     weatherList: settingData.weatherList,
                     temperature: activeLocation.temperature,
                     temperatureColor: _getTemperatureColor(activeLocation.temperature),
@@ -687,7 +687,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
      * @param {boolean} fullRender - If true, all parts of the interface are rendered by default.
      * @param {boolean} globalRender - If true, emits a socket event to synchronize rendering across clients.
      */
-    static _render(parts = [], fullRender = false, globalRender = false) {
+    static async _render(parts = [], fullRender = false, globalRender = false) {
         // Предохранитель чтоб не выёбывался
         if (!VisualNovelDialogues.instance) return
 
@@ -709,7 +709,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
 
         
         VisualNovelDialogues.instance.renderParts = parts
-        VisualNovelDialogues.instance.render(true);
+        await VisualNovelDialogues.instance.render(true);
 
         if (globalRender) game.socket.emit(`module.${C.ID}`, { type: 'renderVN', data: parts });
     }
@@ -1149,7 +1149,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                 const removed = settingData.weatherList.find(w => w.id === optionEl.dataset.id)
                 if (!removed) return
                 settingData.weatherList = settingData.weatherList.filter(w => w.id !== optionEl.dataset.id)
-                const fallback = settingData.weatherList.find(w => w.name === "Неизвестная погода") || settingData.weatherList[0]
+                const fallback = settingData.weatherList[0]
                 settingData.locationList.forEach(m => { if (m.weather?.id === removed.id) m.weather = fallback })
                 if (settingData.location.weather?.id === removed.id) settingData.location.weather = fallback
                 await requestSettingsUpdate(settingData, {renderData: {renderParts: ["headerSlider"]}})

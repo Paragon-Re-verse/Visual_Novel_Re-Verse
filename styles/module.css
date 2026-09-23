@@ -223,7 +223,7 @@
   position: absolute;
   background-size: cover;
   background-position: center;
-  background-image: url(/modules/novel-dialogue-remai/templates/assets/backgroundShadow.webp);
+  background-image: url(/modules/visual-novel-reverse/templates/assets/backgroundShadow.webp);
 }
 #vn-background-shadow.vn-hidden {
   pointer-events: none;
@@ -808,10 +808,6 @@ i.vn-request-icon {
 
 .ap-pos-rel {
   position: relative;
-}
-
-#novel-dialogue-remai section {
-  padding: 0;
 }
 
 #ActorPicker section {
@@ -2422,6 +2418,19 @@ h3.vn-ew-title {
 }
 .vsm-setting-container p {
   font-size: 90%;
+}
+.vsm-setting-menu-button {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 55%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.vsm-setting-menu-button label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vsm-main-menu-body {
