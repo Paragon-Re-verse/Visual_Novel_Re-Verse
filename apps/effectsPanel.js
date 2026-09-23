@@ -25,10 +25,7 @@ export class EffectsPanel extends FormApplication {
             resizable: false,
             id: "EffectsPanel",
             template: `modules/${C.ID}/templates/effectsPanel.hbs`,
-            // TODO: локализация. Файлы language/en.json и language/ru.json сейчас не трогали
-            // (правились "вслепую", без десктопа под рукой, а ломать структуру локализации не хотелось) -
-            // тексты панели пока захардкожены на русском прямо в effectsPanel.hbs.
-            title: "Эффекты",
+            title: game.i18n.localize(`${C.ID}.effectsPanel.windowTitle`),
             closeOnSubmit: false,
             submitOnChange: false
         };
@@ -130,12 +127,12 @@ export class EffectsPanel extends FormApplication {
         html.find('.vn-fx-narrative').on('click', (event) => {
             event.preventDefault()
             new Dialog({
-                title: "Текст",
-                content: `<textarea class="vn-narrative-input" rows="6" style="width:100%;resize:vertical;" placeholder="Новая строка - новая страница"></textarea>`,
+                title: game.i18n.localize(`${C.ID}.effectsPanel.narrativeDialogTitle`),
+                content: `<textarea class="vn-narrative-input" rows="6" style="width:100%;resize:vertical;" placeholder="${game.i18n.localize(`${C.ID}.effectsPanel.narrativePlaceholder`)}"></textarea>`,
                 buttons: {
                     confirm: {
                         icon: '<i class="fas fa-check"></i>',
-                        label: "ПОДТВЕРДИТЬ",
+                        label: game.i18n.localize(`${C.ID}.effectsPanel.confirm`),
                         callback: (html) => triggerNarrativeText(html[0].querySelector('.vn-narrative-input')?.value || "")
                     }
                 },

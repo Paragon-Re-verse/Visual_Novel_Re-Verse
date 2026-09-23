@@ -83,7 +83,7 @@ export class PresetUIClass {
         const settings = foundry.utils.deepClone(game.settings.get(C.ID, 'presetsUI'))
         settings.choosenPreset = id
         await game.settings.set(C.ID, 'presetsUI', settings)
-        VisualNovelDialogues._render(null, true, true)
+        await VisualNovelDialogues._render(null, true, true)
     }
 
     // static async setDefault() {

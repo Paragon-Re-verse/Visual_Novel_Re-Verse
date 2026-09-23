@@ -50,8 +50,6 @@
             "worldWidthEqualFrame": "Width of ALL portraits = width of frames",
             "worldWidthEqualFrameHint": "If enabled, the width of all portraits in the VN window will always be equal to the width of the frame instead of the height.",
             "localizeUpdated": "Localization updated ✔",
-            "monkCommonDisplay": "Display for the Monk Common Display module",
-            "monkCommonDisplayHint": "The Visual Novel window will be displayed in the \"Display\" of the Monk Common Display module",
             "requestsSound": "Requests sound",
             "requestsSoundHint": "A sound corresponding to the level of the request will be played when requests appear",
             "customSliders": "Custom sliders",
@@ -70,7 +68,7 @@
             "useTokenForPortraits": "Use tokens as portraits image",
             "useTokenForPortraitsHint": "If enabled, token images of actors will be used as portraits image",
             "showToolbar": "Show toolbar",
-            "showToolbarHint": "If enabled, the Novel Dialogue Re:Mai toolbar will be displayed in the left side of the FoundryVTT UI",
+            "showToolbarHint": "If enabled, the Visual Novel Re:Verse toolbar will be displayed in the left side of the FoundryVTT UI",
             "useSimpleCalendar": "Use Simple Calendar module",
             "useSimpleCalendarHint": "If enabled, the module will use the time of the Simple Calendar module (WARNING! Make sure the version of Simple Calendar is up to date)",
             "zIndex": "Z-index of the Visual Novel window",
@@ -81,14 +79,20 @@
             "flashDarkSpeedHint": "Duration of the \"Flash of darkness\" effect animation (Effects panel), in seconds",
             "bgScrollDirection": "Background scroll direction",
             "bgScrollDirectionHint": "The default direction the background slowly moves in when the GM enables the \"Background scroll\" button (Effects panel)",
+            "bgScrollDirectionLeft": "<- Left",
+            "bgScrollDirectionRight": "Right ->",
             "bgScrollLoop": "Background scroll looping",
             "bgScrollLoopHint": "\"End\" - the background scroll animation plays once and stops. \"Loop\" - when it reaches an edge, the background reverses direction and keeps moving back and forth indefinitely",
+            "bgScrollLoopEnd": "End",
+            "bgScrollLoopCycle": "Cycle",
             "bgScrollSpeed": "Background scroll speed",
             "bgScrollSpeedHint": "Duration of one pass of the background scroll animation (Effects panel), in seconds",
             "bgBlurStrength": "Background blur strength",
             "bgBlurStrengthHint": "How strong the blur is when the \"Background blur\" effect (Effects panel) is enabled. 0 - no blur, 1 - maximum blur",
             "narrativeTextMode": "Narrative text display mode",
             "narrativeTextModeHint": "\"Instant\" - each page of the \"Narrative\" effect text (Effects panel) appears all at once. \"Periodic\" - the text appears letter by letter, at the pace set by the setting below",
+            "narrativeTextModeInstant": "Instant",
+            "narrativeTextModePeriodic": "Periodic",
             "narrativeTypeSpeed": "Narrative typing speed",
             "narrativeTypeSpeedHint": "How many characters per second the text appears in \"Periodic\" mode above",
             "advancedRequestsSync": "Synchronizing requests with the module \"Advanced Requests\"",
@@ -96,7 +100,7 @@
             "ForcedSettingsMigration": "Forced settings migration to v2.0+",
             "ForcedSettingsMigrationLabel": "Start migration of settings",
             "ForcedSettingsMigrationHint": "If you are experiencing problems with the Visual Novel app data, try to force update the settings for the module version v2.0.0 and higher",
-            "migrationDone": "Migration of Novel Dialogue Re:Mai module settings for version 2.0.0+ is complete ✔",
+            "migrationDone": "Migration of Visual Novel Re:Verse module settings for version 2.0.0+ is complete ✔",
             "discordNotifications": "Notify about entering/leaving voice channel",
             "discordNotificationsHint": "You will receive notifications in FoundryVTT every time someone enters or leaves your voice channel",
             "discordActivitySync": "Player portrait activity is synchronized with Discord",
@@ -111,13 +115,15 @@
             "discordAutoConnectHint": "If enabled, when launching this world in FoundryVTT, the module will automatically try to connect to Discord Bridge",
             "discordHighlightGM": "Highlight GM portraits",
             "discordHighlightGMHint": "If the setting \"Player portrait activity is synchronized with Discord\" is enabled, when the GM speaks, the portrait will be highlighted in the right master-slot",
-            "settingsMainMenu": "Novel Dialogue Re:Mai settings",
+            "settingsMainMenu": "Visual Novel Re:Verse settings",
             "settingsMainMenuLabel": "Open the settings menu",
-            "settingsMainMenuHint": "Menu of all Novel Dialogue Re:Mai module settings",
+            "settingsMainMenuHint": "Menu of all Visual Novel Re:Verse module settings",
             "discordHostUserId": "Foundry userID of the Discord Bridge host",
             "discordHostUserIdHint": "ID of the user on whose computer the start.bat (Discord Bridge) will be run",
             "reloadPromtBody": "You and the selected player need to reload the FoundryVTT page for the changes to take effect. Do you want to do this now?",
-            "reloading": "Reloading FoundryVTT..."
+            "reloading": "Reloading FoundryVTT...",
+            "buttonsCustomizerMenu": "Quick access buttons",
+            "buttonsCustomizerMenuHint": "Customize the list of quick-access buttons (icon, action, who can press it) available to the GM/players. See the module guide for details."
         },
         "toolbar": {
             "openVN": "Open Visual Novel window",
@@ -152,7 +158,7 @@
         "customSliders": {
             "previewButton": "Preview",
             "editButton": "Change images",
-            "confirm": "Подтвердить",
+            "confirm": "Confirm",
             "deleteSet": "Delete Set"
         },
         "permissions": {
@@ -298,7 +304,7 @@
             "noPortrait": "No portrait in the active cell to change its properties",
             "noCharacter": "Couldn't find an image of your character Make sure you have selected a character in the user menu",
             "portraitNotFound": "The portrait has not been found Please try reopening the ActorPicker window or click on the \"Check Actor and Portrait Validity\" button (magnifying glass icon)",
-            "createBackup": "The backup folder of the Novel Dialogue Re:Mai module could not be found. It will be created in the module folder and named \"settingsBackups\"",
+            "createBackup": "The backup folder of the Visual Novel Re:Verse module could not be found. It will be created in the module folder and named \"settingsBackups\"",
             "backImgDosntChange": "The background has not been changed. Close and reopen the VN window to change the background",
             "noTextToImport": "No text to import",
             "sliderSetNotFound": "The slider set could not be found",
@@ -311,7 +317,12 @@
             "confirm": "Add ✔",
             "noName": "No name",
             "iconPlaceholder": "For example 'fa-sun’",
-            "textHelp": "You can find icons on the website \"https://fontawesome.com\" (in the Free section) or similar websites"
+            "textHelp": "You can find icons on the website \"https://fontawesome.com\" (in the Free section) or similar websites",
+            "unknownWeather": "Unknown weather",
+            "sunny": "Sunny",
+            "cloudy": "Cloudy",
+            "foggy": "Fog",
+            "windy": "Windy"
         },
         "locationPicker": {
             "title": "Location selection",
@@ -387,6 +398,8 @@
             "editButtonTooltip": "Edit preset",
             "savePresetTooltip": "Save preset changes",
             "cannotDeleteTheOnlyOne": "You cannot delete the only existing preset",
+            "deletePresetConfirmTitle": "Delete preset?",
+            "deletePresetConfirmContent": "This UI preset and all its saved settings (slots, sliders, active elements) will be permanently deleted. This cannot be undone. Continue?",
             "presetImportTooltip": "Copy preset settings",
             "presetExportTooltip": "Paste preset settings",
             "presetDeleteTooltip": "Delete preset",
@@ -407,7 +420,8 @@
                 "cellRuler": "Cell ruler (1% window size)",
                 "save": "Save",
                 "cancel": "Cancel",
-                "exit": "Return"
+                "exit": "Return",
+                "noneWIP": "< WIP >"
             }
         },
         "portraitsMaker": {
@@ -548,7 +562,7 @@
         "dialogues": {
             "editWindowTitle": "Editing panel information",
             "editWindowHint": "<h2><strong>Portrait</strong></h2><p>The portrait section of this window contains <strong>slots</strong> with <strong>portraits</strong> corresponding to <strong>cells </strong>with <strong>portraits </strong>in the Visual Novel window.</p><p><strong>The </strong>slot being edited is highlighted with an orange border. You can edit the portrait data in the <strong>editable slot</strong> through this window.</p><p><p><strong>The active slot</strong> is highlighted with a black gradient background behind the portrait image. Portraits that are NOT in the <strong>active cells</strong> will be darkened and minimized. </p><ul><li><li><p>Pressing the left-mouse button on the slot will select the slot as <strong>editable</strong></p></li><li><p>Pressing the right-mouse button on the slot will remove portrait from slot/cell</p></li><li><li><p>Pressing Shift + LMB on the slot will toggle <strong>activity</strong> of slot/cell</p></li><li><li><p>Pressing Ctrl + LMB on the slot will make the slot/cell the only <strong>active</strong> at the corresponding side (left/right)</p></li></ul><p>You can move portraits between <strong>cells </strong>by moving them between <strong>slots</strong>. If you move a portrait into an already occupied <strong>slot</strong> - they swap places. If you move the portrait from the <strong>slot </strong>to a <strong>cell </strong>it will be cloned.</p><h2><strong>Portrait Settings</strong></h2><p>As mentioned above, you can change the settings of the portrait that is selected in the <strong>editable slot</strong>. In order to do this, you can use the Change Name and Change Title fields, Scale and Offset sliders, and the checkboxes in the advanced settings section.</p><p>Any changes that you make are <strong>visible only to you,</strong> and will only be applied (and shown to everyone) when you click the <strong>\"Apply\"</strong> button at the bottom of this window. The <strong>\" Cancel\"</strong> button cancels all the changes you have made. In addition, the <strong>Reset</strong> button to the right of the Cancel button resets the Scaling and Offsets</p>",
-            "globalGuideTitle": "Novel Dialogue Re:Mai user guide",
+            "globalGuideTitle": "Visual Novel Re:Verse user guide",
             "close": "Close",
             "stealthPickerTitle": "\"Hidden Portrait Transfer\"",
             "stealthPickerContent1": "— Dragging a Portrait from the ActorPicker window while holding down the Alt key (default) hides its name and title from players.",
@@ -633,7 +647,9 @@
             "executeAsGM": "GM",
             "buttonAction": "When clicked..",
             "runsMacros": "Runs a macros",
-            "executeCommand": "Executes a command"
+            "executeCommand": "Executes a command",
+            "newButton": "New button",
+            "dataAction": "Base action"
         },
         "actorFoldersManager": {
             "title": "Actor Picker Categories & Folders",
@@ -653,6 +669,42 @@
             "deleteCategoryContent": "The category and all its folders will be deleted. Actors linked to those folders will be unlinked (the actors/portraits themselves are not deleted). Continue?",
             "deleteFolderTitle": "Delete folder?",
             "deleteFolderContent": "The folder will be deleted. Actors linked to it will be unlinked (the actors/portraits themselves are not deleted). Continue?"
+        },
+        "effectsPanel": {
+            "windowTitle": "Effects",
+            "targetLabel": "Effect target",
+            "allActiveCharacters": "All active characters",
+            "shake": "Shake",
+            "flashLight": "Light flash",
+            "flashDark": "Dark flash",
+            "darkenBackground": "Darken background",
+            "rowMode": "Row mode",
+            "scrollBackground": "Scroll background",
+            "blurBackground": "Blur background",
+            "narrative": "Narrative",
+            "lockExitForPlayers": "Lock exit for players",
+            "hint": "Shake and flashes apply to the target selected above. Darken background, row mode, scroll background, blur background and lock exit are toggles shared by all players.",
+            "narrativeDialogTitle": "Text",
+            "narrativePlaceholder": "New line - new page",
+            "confirm": "Confirm"
+        },
+        "dataActions": {
+            "hideVN": "Toggle the Visual Novel window display",
+            "openActorSheet": "Open your character's sheet",
+            "toggleUI": "Toggle the Visual Novel window UI display",
+            "hideBack": "Hide the Visual Novel window background",
+            "discordMenu": "Open the Discord Bridge menu",
+            "changeBackground": "Change the background of the selected location",
+            "openSettingsMenu": "Open the module Settings Menu",
+            "toggleEditMode": "Toggle Edit Mode",
+            "toggleLinkChanges": "Toggle location data Link Mode",
+            "resetChanges": "Restore the location to its original state",
+            "epicRolls": "Open the Epic Rolls window of the module of the same name",
+            "mainGuideHint": "Open the module's main guide",
+            "openActorPicker": "Open the Portrait picker window",
+            "editWindowHint": "Open the Editing Window guide",
+            "locationClick": "Open the Location selection menu",
+            "createRequest": "Create a Request"
         }
     }
 }

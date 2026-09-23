@@ -7,7 +7,7 @@ import { discordElementActivity, DiscordIntegration } from './discordIntegration
 import { DiscordMenu } from "../apps/discordMenu.js";
 import { VisualSettingsMenu } from "../apps/visualSettingsMenu.js";
 import { PresetUIClass } from "./presetUIClass.js";
-// import { DefaultButton } from "../apps/buttonsCustomizer.js";
+import { ButtonsCustomizer, DefaultButton } from "../apps/buttonsCustomizer.js";
 
 Hooks.once('init', function() {
 
@@ -94,6 +94,22 @@ Hooks.once('init', function() {
         'type': CustomSlidersSet,
     });
 
+    // Кастомизатор кнопок быстрого доступа
+    game.settings.registerMenu(C.ID, 'buttonsCustomizer', {
+        'name': game.i18n.localize(`${C.ID}.settings.buttonsCustomizerMenu`),
+        'label': game.i18n.localize(`${C.ID}.buttonsCustomizer.openButton`),
+        'hint': game.i18n.localize(`${C.ID}.settings.buttonsCustomizerMenuHint`),
+        'icon': 'fas fa-list-check',
+        restricted: true,
+        'type': ButtonsCustomizer,
+    });
+    game.settings.register(C.ID, "buttonsList", {
+        scope: "world",
+        type: Array,
+        config: false,
+        default: DefaultButton.defauldButtonList().map(button => ({...button})),
+    });
+
     const registerSettings = (key, _scope = 'world', _config = true, _type = Boolean, _default = true, _filePicker = null, reRender = false, choices = null, range = null) => {
         game.settings.register(C.ID, key, {
             ...{
@@ -168,7 +184,7 @@ Hooks.once('init', function() {
     // Смещение всех портретов по оси Y
     registerSettings("worldOffsetY", "world", false, Number, 0, null, true)
     // Количество слотов окна VN (на одной стороне)
-    registerSettings("slotCount", "world", false, Number, 4, null, true) // по умолчанию
+    registerSettings("slotCount", "world", false, Number, 4, null, true, null, {min: 1, max: 5, step: 1}) // по умолчанию
     // z-index окна
     registerSettings("zIndex", "world", false, Number, 90, null, true) // по умолчанию
     // Скорость (длительность, в секундах) вспышки света/тьмы - панель "Эффекты" (apps/effectsPanel.js),
@@ -183,8 +199,8 @@ Hooks.once('init', function() {
     // (apps/visualSettingsMenu.js, effectsSettingsKeys), рядом с flashLightSpeed/flashDarkSpeed.
     // choices здесь - {key: "показываемый текст кнопки"}, settingsArray()/visualSettingsMenu.hbs рисует
     // из них не выпадающий список, а пару кнопок-переключателей (см. .vsm-choice-button)
-    registerSettings("bgScrollDirection", "world", false, String, "right", null, false, {left: "<- Налево", right: "Направо ->"})
-    registerSettings("bgScrollLoop", "world", false, String, "end", null, false, {end: "Конец", cycle: "Цикл"})
+    registerSettings("bgScrollDirection", "world", false, String, "right", null, false, {left: game.i18n.localize(`${C.ID}.settings.bgScrollDirectionLeft`), right: game.i18n.localize(`${C.ID}.settings.bgScrollDirectionRight`)})
+    registerSettings("bgScrollLoop", "world", false, String, "end", null, false, {end: game.i18n.localize(`${C.ID}.settings.bgScrollLoopEnd`), cycle: game.i18n.localize(`${C.ID}.settings.bgScrollLoopCycle`)})
     // Скорость (длительность полного прохода, в секундах) прокрутки фона - тот же слайдер-паттерн, что и
     // flashLightSpeed/flashDarkSpeed выше, применяется в main.js (_onRender) как animationDuration поверх
     // CSS-анимации. Дефолт (45s) совпадает с исходной хардкод-длительностью CSS, чтобы поведение не
@@ -198,7 +214,7 @@ Hooks.once('init', function() {
     // Режим показа текста в эффекте "Нарратив" (панель "Эффекты") - "Моментально" (вся страница сразу)
     // или "Периодически" (по буквам, см. narrativeTypeSpeed ниже) - тот же паттерн кнопок-переключателей,
     // что у bgScrollDirection/bgScrollLoop выше.
-    registerSettings("narrativeTextMode", "world", false, String, "instant", null, false, {instant: "Моментально", periodic: "Периодически"})
+    registerSettings("narrativeTextMode", "world", false, String, "instant", null, false, {instant: game.i18n.localize(`${C.ID}.settings.narrativeTextModeInstant`), periodic: game.i18n.localize(`${C.ID}.settings.narrativeTextModePeriodic`)})
     // Темп появления букв в режиме "Периодически" - символов в секунду. Тот же слайдер-паттерн, что и
     // flashLightSpeed/bgScrollSpeed выше, применяется в main.js (_playNarrativeText).
     registerSettings("narrativeTypeSpeed", "world", false, Number, 20, null, false, null, {min: 2, max: 60, step: 1})
@@ -212,8 +228,6 @@ Hooks.once('init', function() {
     registerSettings("hiddenNamePlaceholder", "world", false, String, "???")
     // Плейсхолдер скрытого титула
     registerSettings("hiddenTitlePlaceholder", "world", false, String, "")
-    // Отображение для Monk Common Display
-    registerSettings("monkCommonDisplay", "world", false, Boolean, true, null, true)
     // Использование Simple Calendar для отображения времени
     registerSettings("useSimpleCalendar", "world", false, Boolean, true, null, true)
     // Синхронизация заявок с модулем "Advanced Requests"
@@ -262,25 +276,18 @@ Hooks.once('init', function() {
     registerSettings("playersPermissions", "world", false, Object, defaultPermissions, null, true)
     // Наборы
     registerSettings("assetPacks", "world", false, Object, {locationPacks: [], portraitPacks: []}, null, true)
-    // Штука
-    registerSettings("showNewThingyDialog", "client", false, Boolean, true)
     // Настройки для автосоздания Портретов
     registerSettings("autoPortraitSettings", "world", false, Object, defaultPortraitSettings)
     // Использовать группу настроек для автосоздания Портретов для остальных групп
     registerSettings("useChosenGroupSettings", "world", false, String, "")
     // Скрытые группы для автосоздания портретов
     registerSettings("hiddenTypes", "world", false, Array, [])
-    // Последняя версия модуля (дебаг-инструмент)
-    registerSettings("lastVersion", "world", false, String, "2.0.0")
     // Буффер детального режима
     registerSettings("detailModeBuffer", "client", false, Object, {mode: "moveSliders", hideApps: false, cellRuler: false})
     // Режим просмотра
     registerSettings("viewMode", "client", false, Boolean, false)
     // Одноразовые проверки
     registerSettings("oneTimeChecks", "world", false, Object, {startDialog: true, updateToV2: true})
-    // Список кнопок
-    // registerSettings("buttonList", "world", false, Array, DefaultButton.defauldButtonList())
-
 
     // УСТАРЕЛО
     globalThis.ui.VisualNovel = {
@@ -381,27 +388,27 @@ const defaultVnData = () => {
         requests: [],
         weatherList: [
             {
-                name: "Неизвестная погода",
+                name: game.i18n.localize(`${C.ID}.createWeather.unknownWeather`),
                 icon: "fas fa-eye-slash",
                 id: foundry.utils.randomID()
             },
             {
-                name: "Солнечно",
+                name: game.i18n.localize(`${C.ID}.createWeather.sunny`),
                 icon: "fas fa-sun",
                 id: foundry.utils.randomID()
             },
             {
-                name: "Облачно",
+                name: game.i18n.localize(`${C.ID}.createWeather.cloudy`),
                 icon: "fas fa-cloud-sun",
                 id: foundry.utils.randomID()
             },
             {
-                name: "Туман",
+                name: game.i18n.localize(`${C.ID}.createWeather.foggy`),
                 icon: "fas fa-smog",
                 id: foundry.utils.randomID()
             },
             {
-                name: "Ветренно",
+                name: game.i18n.localize(`${C.ID}.createWeather.windy`),
                 icon: "fas fa-wind",
                 id: foundry.utils.randomID()
             }
@@ -431,14 +438,7 @@ Hooks.on('setup', () => {
         }
     })
 
-    game.settings.register(C.ID, "showStartHint", {
-        scope: "client",
-        type: Boolean,
-        config: false,
-        default: true
-    })
-
-    game.settings.register(C.ID, 'vnData', { 
+    game.settings.register(C.ID, 'vnData', {
         scope: 'world',
         type: Object,
         default: defaultVnData()
@@ -596,15 +596,16 @@ function pushControlButtons(controls){
     const showToolbar = game.settings.get(C.ID, "showToolbar")
     if (!showToolbar || !allowTo("displayControl")) return
 
-    const tokenButtons = controls.find(c => c.name == "token")
-    tokenButtons.tools.push(
-        {
+    // Foundry v13: controls - объект по группам, tools внутри группы - тоже объект (не массив)
+    if (controls.tokens) {
+        controls.tokens.tools.openWithControlledTokens = {
             name: "openWithControlledTokens",
             title: game.i18n.localize(`${C.ID}.toolbar.openWithControlledTokens`),
             icon: "fas fa-users-viewfinder",
             visible: true,
             button: true,
-            onClick: async () => {
+            order: Object.keys(controls.tokens.tools).length,
+            onChange: async () => {
                 const controlledActorIds = {
                     players: canvas.tokens.controlled.filter(t => t.actor?.type == "character").map(t => t.actor?.id),
                     npc: canvas.tokens.controlled.filter(t => t.actor?.type != "character").map(t => t.actor?.id),
@@ -612,40 +613,45 @@ function pushControlButtons(controls){
                 await parseActors(controlledActorIds)
             }
         }
-    )
-  
-    controls.push({
-        name: "VisualNovelToolbar",
+    }
+
+    controls.visualNovelToolbar = {
+        name: "visualNovelToolbar",
         title: "Visual Novel toolbar",
         icon: "fas fa-users-between-lines",
         layer: "visualNovelDialogues",
-        tools: [
-            {
+        visible: true,
+        activeTool: "openVN",
+        tools: {
+            openVN: {
                 name: "openVN",
                 title: game.i18n.localize(`${C.ID}.toolbar.openVN`),
                 icon: "fas fa-window-maximize",
                 visible: true,
                 button: true,
-                onClick: () => { VisualNovelDialogues.toggleVN() }
+                order: 0,
+                onChange: () => { VisualNovelDialogues.toggleVN() }
             },
-            {
+            hiddenOpenVN: {
                 name: "hiddenOpenVN",
                 title: game.i18n.localize(`${C.ID}.toolbar.hiddenOpenVN`),
                 icon: "fas fa-eye-low-vision",
                 visible: true,
                 button: true,
-                onClick: () => { 
+                order: 1,
+                onChange: () => {
                     ui.notifications.info(game.i18n.localize(`${C.ID}.settings.showVNOnlyForYou`))
-                    VisualNovelDialogues.toggleVN([game.user.id]) 
+                    VisualNovelDialogues.toggleVN([game.user.id])
                 }
             },
-            {
+            openWithSceneTokens: {
                 name: "openWithSceneTokens",
                 title: game.i18n.localize(`${C.ID}.toolbar.openWithSceneTokens`),
                 icon: "fas fa-users-rectangle",
                 visible: true,
                 button: true,
-                onClick: async () => { 
+                order: 2,
+                onChange: async () => {
                     const actorOnSceneIds = {
                         players: canvas.tokens.placeables.filter(t => t.actor?.type == "character").map(t => t.actor?.id),
                         npc: canvas.tokens.placeables.filter(t => t.actor?.type != "character").map(t => t.actor?.id),
@@ -653,14 +659,15 @@ function pushControlButtons(controls){
                     await parseActors(actorOnSceneIds)
                 }
             },
-            {
+            openWithChoosenPlayers: {
                 // Это переделать надо. Мы открываем ДЛЯ ИГРОКОВ, а не "выбираем портреты для переноса в VN"
                 name: "openWithChoosenPlayers",
                 title: game.i18n.localize(`${C.ID}.toolbar.openWithChoosenPlayers`),
                 icon: "far fa-users-gear",
                 visible: true,
                 button: true,
-                onClick: () => {
+                order: 3,
+                onChange: () => {
                     const players = game.users.filter(p=>p.active)
                     let content = `<form class="flexcol">`
                     for (let i = 0; i < players.length; i++) {
@@ -691,18 +698,19 @@ function pushControlButtons(controls){
                     }).render(true)
                 }
             },
-            {
+            forcedOpen: {
                 name: "forcedOpen",
                 title: game.i18n.localize(`${C.ID}.toolbar.forcedOpen`),
                 icon: "fas fa-people-pulling",
                 visible: true,
                 button: true,
-                onClick: () => { 
+                order: 4,
+                onChange: () => {
                     VisualNovelDialogues.toggleVN(game.users.filter(p=>p.active).map(p=>p.id))
                  }
             },
-        ],
-    });
+        },
+    };
 }
 
 async function parseActors(actorIds) {
