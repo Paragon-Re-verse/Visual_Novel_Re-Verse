@@ -137,8 +137,12 @@ export class VisualSettingsMenu extends FormApplication {
                     type: typeof(_setting.type()),
                     filePicker: _setting.filePicker || null
                 }
+                // _setting.choices хранит i18n-КЛЮЧИ, а не готовый текст (см. registerSettings вызовы
+                // в scripts/settings.js для bgScrollDirection/bgScrollLoop/narrativeTextMode) - резолвим
+                // их здесь, в момент отрисовки этого меню (переводы уже точно загружены), а не заранее
+                // на регистрации настройки внутри Hooks.once('init', ...), где game.i18n ещё не готов
                 if (_setting.choices) item.choices = Object.keys(_setting.choices).reduce((acc, current) => {
-                    acc.push({key: current, value: _setting.choices[current]})
+                    acc.push({key: current, value: game.i18n.localize(_setting.choices[current])})
                     return acc
                 }, [])
                 // {min, max, step} - если задано при регистрации (см. registerSettings в scripts/settings.js),
@@ -193,7 +197,6 @@ export class VisualSettingsMenu extends FormApplication {
                     } else {
                         this.render(true, {left: window.innerWidth * 0.25, top: window.innerHeight * 0.2})
                     }
-                    this.bringToFront()
                 })
             })
         } else {
@@ -203,7 +206,6 @@ export class VisualSettingsMenu extends FormApplication {
                 button.addEventListener('click', (event) => {
                     this.mode = "home"
                     this.render(true, {left: (window.innerWidth - 760) / 2, top: (window.innerHeight - 560) / 2})
-                    this.bringToFront()
                 })
             })
         }
@@ -565,7 +567,6 @@ export class VisualSettingsMenu extends FormApplication {
                 if (event.currentTarget.dataset.app == "detailUI") {
                     this.mode = "detailUI"
                     this.render(true, {left: window.innerWidth * 0.4, top: window.innerHeight * 0.6})
-                    this.bringToFront()
                 } else {
                     const app = new ButtonsCustomizer()
                     app.render(true)
@@ -659,7 +660,6 @@ export class VisualSettingsMenu extends FormApplication {
             html.find('.vsm-detailUI-close-button').on('click', () => {
                 this.mode = "menuUI"
                 this.render(true, {left: window.innerWidth * 0.05, top: window.innerHeight * 0.1})
-                this.bringToFront()
             })
 
         // Меню настроек автосоздания Портретов
@@ -1165,8 +1165,11 @@ export class VisualSettingsMenu extends FormApplication {
         }
 
         await game.settings.set(C.ID, "viewMode", detailMode);
-        if (detailMode) await quickSettingsUpdate({editMode: false}, {renderData: {renderParts: ["editWindow", "foreground", "headerSlider", ..._portraitPartsKeys()]}})
-        else VisualNovelDialogues._render(["editWindow", "foreground", "headerSlider", ..._portraitPartsKeys()]);
+        // "bars" - на входе в Detailed mode показываем все bar независимо от barsAlwaysShow/"тронут
+        // ли уже" (иначе нечего хватать мувером), на выходе - актуализируем обратно до обычных
+        // правил видимости (см. main.js _preparePartContext "bars" case, inDetailedMode)
+        if (detailMode) await quickSettingsUpdate({editMode: false}, {renderData: {renderParts: ["editWindow", "foreground", "headerSlider", "bars", ..._portraitPartsKeys()]}})
+        else VisualNovelDialogues._render(["editWindow", "foreground", "headerSlider", "bars", ..._portraitPartsKeys()]);
     }
 
     // А это тут просто по приколу (просто тронь - и всё развалится)

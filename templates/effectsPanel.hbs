@@ -60,18 +60,22 @@
         </div>
 
         <div class="vn-fx-bars-column flexcol">
-            <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.barsColumnTitle"}}</label>
+            <div class="vn-fx-bars-column-header flexrow">
+                <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.barsColumnTitle"}}</label>
+                <button type="button" class="vn-fx-bar-add-button"><i class="fas fa-plus"></i> {{localize "visual-novel-reverse.visualSettingsMenu.addBarLabel"}}</button>
+            </div>
             {{#if bars.length}}
                 {{#each bars}}
                     <div class="vn-fx-bar-row" data-bar-id="{{this.id}}">
                         <div class="vn-fx-bar-row-top flexrow">
                             <input type="text" data-key="name" value="{{this.name}}" placeholder="{{localize "visual-novel-reverse.effectsPanel.barNamePlaceholder"}}">
-                            <input type="color" data-key="color" value="{{this.color}}">
-                            <select data-key="mode">
+                            <input type="color" data-key="color" value="{{this.color}}" data-tooltip="{{localize "visual-novel-reverse.effectsPanel.barColorLabel"}}" title="{{localize "visual-novel-reverse.effectsPanel.barColorLabel"}}">
+                            <select data-key="mode" data-tooltip="{{localize "visual-novel-reverse.effectsPanel.barModeHint"}}">
                                 <option value="counter" {{#unless this.isTimer}}selected{{/unless}}>{{localize "visual-novel-reverse.effectsPanel.barModeCounter"}}</option>
                                 <option value="timer" {{#if this.isTimer}}selected{{/if}}>{{localize "visual-novel-reverse.effectsPanel.barModeTimer"}}</option>
                             </select>
                         </div>
+                        <p class="vn-fx-bar-mode-hint">{{localize "visual-novel-reverse.effectsPanel.barModeHint"}}</p>
                         {{#if this.isTimer}}
                             <div class="vn-fx-bar-row-bottom flexrow">
                                 <input type="number" class="vn-fx-bar-timer-part" data-key="timerH" min="0" max="99" value="{{this.timerH}}">:

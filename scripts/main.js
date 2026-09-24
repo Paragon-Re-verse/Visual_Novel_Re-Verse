@@ -115,10 +115,10 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
     }
 
     // Пиздец
-    partsClassData = {headerSlider: ["slide", "hideUI"], leftSlider: ["slide", "hideUI"], rightSlider: ["slide", "hideUI"], editWindow: ["fade", "editMode"], background: ["fade", "hideBack"], foreground: ["fade", "hideUI"]}
+    partsClassData = {headerSlider: ["slide", "hideUI"], leftSlider: ["slide", "hideUI"], rightSlider: ["slide", "hideUI"], editWindow: ["fade", "editMode"], background: ["fade", "hideBack"], foreground: ["fade", "hideUI"], bars: ["fade", "hideUI"]}
     _getPartClass=(part, settingData = getSettings(), uiData = PresetUIClass.getActivePreset()) => {
         const curState = this.partsState[part]
-        const partIsActive = uiData.activeElements[part] || ["editWindow", "background", "foreground"].includes(part)
+        const partIsActive = uiData.activeElements[part] || ["editWindow", "background", "foreground", "bars"].includes(part)
         let partDoesNotHide = !settingData[this.partsClassData[part][1]]
         if (part == "editWindow") partDoesNotHide = !partDoesNotHide
         const newState = (this._canSeeVN(settingData) && partDoesNotHide && partIsActive) ? "shown" : "hidden"
@@ -299,13 +299,19 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                 // Живое содержимое (название/цвет/значение/режим) - settingData.barsData, отдельная
                 // настройка vnData, редактируется из панели "Эффекты" (apps/effectsPanel.js).
                 const barsAlwaysShow = game.settings.get(C.ID, "barsAlwaysShow")
+                // В Detailed mode (viewMode) bar должен быть виден ГМу независимо от barsAlwaysShow/
+                // "тронут ли уже в панели Эффекты" - иначе его физически не за что схватить мувером,
+                // чтобы позиционировать/удалить (см. detailModeChanges в visualSettingsMenu.js, баг
+                // "мувер bar никогда не рендерится", т.к. .vn-bar узла в DOM не было вовсе).
+                const inDetailedMode = game.settings.get(C.ID, "viewMode")
                 const barsLayout = context.bars || []
                 const barsContent = settingData.barsData || []
                 const bars = barsLayout.reduce((acc, layout) => {
                     const barContent = barsContent.find(b => b.id === layout.id)
                     // Bar скрыт, пока ГМ ни разу не поменял его значение в панели "Эффекты"
                     // (нет записи в barsData) - если только не включено "Всегда показывать bar"
-                    if (!barContent && !barsAlwaysShow) return acc
+                    // либо ГМ сейчас в Detailed mode (см. выше)
+                    if (!barContent && !barsAlwaysShow && !inDetailedMode) return acc
                     const merged = barContent || { id: layout.id, name: "", color: "#a33636", value: 0, mode: "counter" }
                     const displayValue = (merged.mode == "timer" && merged.timerEndTimestamp)
                         ? Math.max(0, Math.min(100, ((merged.timerEndTimestamp - Date.now()) / (merged.timerDurationSeconds * 1000)) * 100))
@@ -313,7 +319,13 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                     acc.push({ ...layout, ...merged, displayValue })
                     return acc
                 }, [])
-                context = { ...context, bars, barChangeSpeed: game.settings.get(C.ID, "barChangeSpeed") }
+                context = { ...context, bars, barChangeSpeed: game.settings.get(C.ID, "barChangeSpeed"),
+                    // Bar-контейнер прятался/показывался НЕЗАВИСИМО от showVN (не входил в partsClassData
+                    // вообще) - при закрытии VN (showVN: false) остальные плашки (#vn-up/left/right)
+                    // корректно уезжали через vn-hidden-slide, а .vn-bars-container оставался висеть
+                    // поверх экрана как ни в чём не бывало
+                    barsClass: this._getPartClass(partType, settingData, context._uiData),
+                }
                 break;
             case "slider":
                 // +offset(uiData), +pFieldClass, 
@@ -1542,7 +1554,7 @@ function _injectEffectStyles() {
         .vn-fx-sprite-flash-light { animation: vn-fx-sprite-flash-light-anim .4s ease-out; }
         .vn-fx-sprite-flash-dark { animation: vn-fx-sprite-flash-dark-anim .5s ease-out; }
         /* Окно панели "Эффекты" (apps/effectsPanel.js) */
-        .vn-fx-panel-body .window-content { padding: 8px; }
+        .vn-fx-panel-app .window-content { padding: 8px; }
         .vn-fx-panel .vn-fx-section { margin-bottom: 8px; }
         .vn-fx-panel .vn-fx-row { display: flex; gap: 6px; }
         .vn-fx-panel .vn-fx-row button { flex: 1; }
@@ -1776,7 +1788,26 @@ function _applyBackgroundVisualEffects() {
 function _applyBarVisualState() {
     const settingData = getSettings()
     const uiData = PresetUIClass.getActivePreset()
+    const barsAlwaysShow = game.settings.get(C.ID, "barsAlwaysShow")
     const barsContent = settingData.barsData || []
+
+    // Обнаружить структурное изменение (bar добавлен/удалён/сменился критерий видимости) -
+    // независимо от ТОГО, кто и как поменял данные (панель "Эффекты", detailed mode, ручное
+    // редактирование настроек, сокет от другого клиента). Раньше на это полагались только вызовы,
+    // которые сами явно просили renderParts:["bars"] - любое другое изменение (например прямая
+    // правка world-настройки barsData/presetsUI в обход UI модуля) молча теряло bar-узлы: они либо
+    // не появлялись, либо, наоборот, оставались висеть и тикать в DOM после удаления из данных.
+    const inDetailedMode = game.settings.get(C.ID, "viewMode")
+    const expectedIds = uiData.bars
+        .filter(layout => barsAlwaysShow || inDetailedMode || barsContent.some(b => b.id === layout.id))
+        .map(layout => layout.id)
+    const currentIds = Array.from(document.querySelectorAll('.vn-bar[data-bar-id]')).map(el => el.dataset.barId)
+    const structuralChange = expectedIds.length !== currentIds.length || expectedIds.some(id => !currentIds.includes(id))
+    if (structuralChange) {
+        if (VisualNovelDialogues.instance) VisualNovelDialogues._render(["bars"])
+        return
+    }
+
     uiData.bars.forEach(layout => {
         const barEl = document.querySelector(`.vn-bar[data-bar-id="${layout.id}"]`)
         if (!barEl) return
@@ -2115,6 +2146,15 @@ Hooks.on("updateSetting", async (setting, value, diff, userId) => {
         if (diff?.renderData) VisualNovelDialogues._render(diff.renderData.renderParts, diff.renderData.fullRender)
     }
 
+    // Раскладка bar (позиция/сам факт существования) живёт в presetsUI, а не в vnData - изменение
+    // presetsUI само по себе не проходит через ветку выше. Обычно это не нужно (добавление bar
+    // ничего не рендерит, пока он не тронут в панели "Эффекты", а удаление через detailed mode само
+    // просит renderParts:["bars"] через vnData), но правит и более редкий случай прямого
+    // редактирования presetsUI в обход UI модуля.
+    if (setting.key == `${C.ID}.presetsUI`) {
+        _applyBarVisualState()
+    }
+
     // Переключаем синхронизацию в Advanced Requests -> переключаем её и в VN
     if (setting.key == `advanced-requests.visualNovelSync`) {
         await game.settings.set(C.ID, 'advancedRequestsSync', value.key)
@@ -2138,9 +2178,14 @@ Hooks.on("updateSetting", async (setting, value, diff, userId) => {
 // VisualSettingsMenu - mover'ы слайдеров в детальном режиме:
 // - Рендер и удаление mover'ов при переход в детальный режим и из него соответственно
 Hooks.on("renderVisualSettingsMenu", async (app, html, options) => {
+    // Поднимаем окно поверх остальных ПОСЛЕ того, как рендер реально завершился - если звать
+    // bringToFront() сразу после (не await) this.render() в самих обработчиках кликов, Foundry
+    // может позже переустановить z-index при монтировании нового содержимого и свести эффект на
+    // нет (баг №8 из ревизии тестирования: окно не всплывает поверх core Configure Settings).
+    app.bringToFront()
     if (["detailUI", "menuUI"].includes(options.showMode)) {
         await VisualSettingsMenu.detailModeChanges(html, options.showMode == "detailUI");
-    } 
+    }
 });
 // - Удаление mover'ов при закрытии visualSettingsMenu
 Hooks.on("closeVisualSettingsMenu", async (app, html, options) => {

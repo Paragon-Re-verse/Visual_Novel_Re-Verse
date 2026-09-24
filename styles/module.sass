@@ -2208,10 +2208,15 @@ h3.vn-ew-title
     p
         font-size: 90%
 
-.vsm-setting-menu-button
-    flex: 0 1 auto
-    min-width: 0
-    max-width: 55%
+// Специфичность .vsm-setting-container .vsm-setting-menu-button (2 класса) + !important - жёстко
+// перебивает правило ядра Foundry вроде ".form-group button" (1 класс + тип), которое иначе выигрывает
+// по specificity и растягивает кнопку. Абсолютный (не %) max-width - процентный вариант считался от
+// куда более широкого предка, чем видимое окно настроек.
+.vsm-setting-container .vsm-setting-menu-button
+    flex: 0 1 auto !important
+    width: auto !important
+    min-width: 0 !important
+    max-width: 140px !important
     overflow: hidden
     white-space: nowrap
     text-overflow: ellipsis
@@ -3748,6 +3753,32 @@ select[name="hostUserId"]
     max-height: 480px
     overflow-y: auto
 
+.vn-fx-bars-column-header
+    justify-content: space-between
+    align-items: center
+    margin-bottom: 6px
+
+.vn-fx-bar-add-button
+    display: inline-flex
+    align-items: center
+    gap: 4px
+    padding: 3px 8px
+    border-radius: 5px
+    background-color: #542018
+    border: 1px solid #782e22
+    color: aliceblue
+    cursor: pointer
+    font-size: 90%
+    &:hover
+        background-color: #6b2a20
+        text-shadow: 0 0 4px #df9446
+
+.vn-fx-bar-mode-hint
+    font-size: 85%
+    opacity: 0.75
+    font-style: italic
+    margin: 2px 0 6px 0
+
 .vn-fx-bar-row
     border: 1px solid #542018
     border-radius: 5px
@@ -3774,3 +3805,73 @@ select[name="hostUserId"]
     min-width: 36px
     text-align: right
     font-weight: 700
+
+// ===== Buttons Customizer (apps/buttonsCustomizer.js) - панель раньше не имела вообще никакой CSS,
+// кнопка "открыть" визуально не отличалась от декоративного мокапа рядом =====
+
+.vn-buttons-customizer
+    display: flex
+    flex-direction: column
+    gap: 8px
+    padding: 8px
+
+.vbc-hint
+    font-style: italic
+    font-size: 90%
+    opacity: 0.8
+    margin: 0 0 4px 0
+
+.vbc-header
+    display: flex
+    justify-content: flex-end
+
+.vbc-add-button
+    display: inline-flex
+    align-items: center
+    gap: 6px
+    padding: 4px 12px
+    border-radius: 5px
+    background-color: #542018
+    border: 1px solid #782e22
+    color: aliceblue
+    cursor: pointer
+    font-weight: 700
+    &:hover
+        background-color: #6b2a20
+        text-shadow: 0 0 4px #df9446
+
+.vbc-list-body
+    display: flex
+    flex-direction: column
+    gap: 6px
+    max-height: 480px
+    overflow-y: auto
+
+.vbc-list-item
+    display: flex
+    align-items: center
+    flex-wrap: wrap
+    gap: 6px
+    border: 1px solid #542018
+    border-radius: 5px
+    padding: 6px
+    input[type="text"]
+        flex: 1
+        min-width: 100px
+
+.vbc-item-icon
+    width: 24px
+    text-align: center
+
+.vbc-delete-button,
+.vbc-duplicate-button
+    cursor: pointer
+    padding: 4px 8px
+    border-radius: 4px
+    background-color: #43454b
+
+.vbc-delete-button:hover
+    color: #ff4545
+
+.vbc-duplicate-button:hover
+    color: #df9446

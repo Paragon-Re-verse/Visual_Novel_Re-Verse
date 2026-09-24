@@ -163,7 +163,8 @@
             "previewButton": "Предсмотр",
             "editButton": "Изменить изображения",
             "confirm": "Подтвердить",
-            "deleteSet": "Удалить набор"
+            "deleteSet": "Удалить набор",
+            "editDialogTitle": "Настройки набора Custom Slider"
         },
         "permissions": {
             "editWindow": "Окно редактирования",
@@ -428,7 +429,8 @@
                 "noneWIP": "< WIP >"
             },
             "addBarTooltip": "Добавить bar",
-            "deleteBarTooltip": "Удалить bar"
+            "deleteBarTooltip": "Удалить bar",
+            "addBarLabel": "Добавить bar"
         },
         "portraitsMaker": {
             "tokenImage": "Изображение токена",
@@ -655,7 +657,8 @@
             "runsMacros": "Запустить макрос",
             "executeCommand": "Выполнить команду",
             "newButton": "Новая кнопка",
-            "dataAction": "Базовое действие"
+            "dataAction": "Базовое действие",
+            "hint": "Настройка кнопок быстрого доступа внутри окна Visual Novel - каждая может выполнять встроенное действие, макрос или свою команду, и быть доступна только ГМу либо и игрокам тоже."
         },
         "dataActions": {
             "hideVN": "Переключить отображение окна Visual Novel",
@@ -673,7 +676,10 @@
             "openActorPicker": "Открыть окно выбора Портретов",
             "editWindowHint": "Открыть руководство по Окну редактирования",
             "locationClick": "Открыть меню Выбора локации",
-            "createRequest": "Создать Заявку"
+            "createRequest": "Создать Заявку",
+            "effectsWindow": "Открыть панель визуальных эффектов",
+            "deletePortraitFromOrder": "Убрать этот портрет из очереди активных (ПКМ)",
+            "requestClick": "Принять или отклонить заявку (ЛКМ/ПКМ)"
         },
         "actorFoldersManager": {
             "title": "Категории и Папки Actor Picker",
@@ -716,7 +722,9 @@
             "barModeCounter": "Счётчик",
             "barModeTimer": "Таймер",
             "barTimerStart": "Запустить",
-            "noBarsHint": "В текущем UI-пресете пока нет ни одного bar. Добавьте его в тайле \"UI customization\" меню настроек."
+            "noBarsHint": "В текущем UI-пресете пока нет ни одного bar. Добавьте его в тайле \"UI customization\" меню настроек.",
+            "barColorLabel": "Цвет",
+            "barModeHint": "Счётчик: значение (0-100%) задаётся вручную. Таймер: задаётся длительность (ЧЧ:ММ:СС), и шкала сама убывает со временем."
         }
     }
 }
