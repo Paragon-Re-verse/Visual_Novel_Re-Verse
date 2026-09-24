@@ -1,4 +1,4 @@
-import { Constants as C, defaultPortraitSettingsTemplate, quickSettingsUpdate, uiButtonsIcons } from '../scripts/const.js';
+import { Constants as C, defaultPortraitSettingsTemplate, quickSettingsUpdate, uiButtonsIcons, getSettings } from '../scripts/const.js';
 import { _portraitPartsKeys, VisualNovelDialogues } from '../scripts/main.js';
 import { PresetUIClass } from '../scripts/presetUIClass.js';
 import { openMassPortraitCreator } from './actorPicker.js';
@@ -161,7 +161,7 @@ export class VisualSettingsMenu extends FormApplication {
         const modulesSettingsKeys = ["useSimpleCalendar", "advancedRequestsSync", "discordNotifications", "discordActivitySync", "discordAutoConnect", "discordChannelId", "discordHighlightGM"]
         // Effects settings menu (панель "Эффекты" - apps/effectsPanel.js)
         const effectsSettingsMenus = []
-        const effectsSettingsKeys = ["flashLightSpeed", "flashDarkSpeed", "bgScrollDirection", "bgScrollLoop", "bgScrollSpeed", "bgBlurStrength", "narrativeTextMode", "narrativeTypeSpeed"]
+        const effectsSettingsKeys = ["flashLightSpeed", "flashDarkSpeed", "bgScrollDirection", "bgScrollLoop", "bgScrollSpeed", "bgBlurStrength", "narrativeTextMode", "narrativeTypeSpeed", "barChangeSpeed", "barsAlwaysShow"]
 
         const settings =
             _mode=== "menuVisual" ? settingsArray(visualSettingsMenus, visualSettingsKeys) :
@@ -299,6 +299,17 @@ export class VisualSettingsMenu extends FormApplication {
                     settingHintEl.textContent = game.i18n.localize(`${C.ID}.visualSettingsMenu.hintPlaceholder`)
                     settingHintEl.fontWeight = null
                 })
+            })
+
+            // Добавить bar (горизонтальную шкалу) - только раскладка (позиция по умолчанию,
+            // без перемещения/ресайза). Перемещение и ресайз - в detailed mode.
+            html[0].querySelector('.vsm-add-bar-button')?.addEventListener('click', async (event) => {
+                if (!this.editablePreset) {
+                    ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
+                    return
+                }
+                await PresetUIClass.addBar(this.editablePreset)
+                this.render()
             })
 
             // Добавить пресет
@@ -616,6 +627,17 @@ export class VisualSettingsMenu extends FormApplication {
                     presetData.offset[`${mover}SliderX`] = x
                     presetData.offset[`${mover}SliderY`] = y
                     presetData.scale[`${mover}Slider`] = s
+                })
+                // То же самое для bar - по одному муверу (#vsm-mover-bar-<id>) на каждый bar,
+                // читаем актуальные X/Y/масштаб из его текста так же, как у слайдеров выше
+                const currentPreset = PresetUIClass.getPreset(editablePresetId)
+                presetData.bars = currentPreset.bars.map(bar => {
+                    const moverEl = document.getElementById(`vsm-mover-bar-${bar.id}`)
+                    if (!moverEl) return bar
+                    const x = parseInt(moverEl.querySelector('.vsm-mover-X').textContent.split(": ")[1].split("%")[0]) || 0
+                    const y = parseInt(moverEl.querySelector('.vsm-mover-Y').textContent.split(": ")[1].split("%")[0]) || 0
+                    const s = parseInt(moverEl.querySelector('.vsm-mover-scale').textContent.split(": ")[1].split("%")[0]) || 100
+                    return { ...bar, offsetX: x, offsetY: y, scale: s }
                 })
 
                 await PresetUIClass.updatePreset(editablePresetId, presetData)
@@ -983,6 +1005,137 @@ export class VisualSettingsMenu extends FormApplication {
         return moverBody;
     }
 
+    // Мувер для bar - упрощённая версия _getMoverEl выше: bar позиционируется плоскими left/top %
+    // (та же конвенция, что у headerSlider), поэтому не нужен ни выбор стороны, ни специальный
+    // множитель {right: -100, header: 143} из _getMoverEl (там он компенсирует anchor справа/магическую
+    // разницу масштаба заголовка). Плюс кнопка удаления bar прямо на мувере - detailed mode это
+    // единственное место, где bar можно удалить (добавление - кнопкой в UI customization).
+    static _getBarMoverEl(barId) {
+        const moverBody = document.createElement('div');
+        moverBody.className = 'vsm-mover vsm-bar-mover';
+        moverBody.id = `vsm-mover-bar-${barId}`;
+
+        const curPreset = PresetUIClass.getActivePreset()
+        const bar = curPreset.bars.find(b => b.id === barId)
+        const barEl = document.querySelector(`.vn-bar[data-bar-id="${barId}"]`)
+        // Раскладка может ссылаться на bar, DOM-узла которого сейчас нет (скрыт - см. barsAlwaysShow,
+        // main.js _preparePartContext "bars"). Без узла двигать нечего - мувер не создаём.
+        if (!bar || !barEl) return null
+
+        moverBody.style.transform = `translate(-50%, 0%) scale(${100 / bar.scale})`;
+
+        moverBody.innerHTML = `
+            <div class="vsm-mover-container flexrow">
+                <div class="vsm-mover-reset" data-tooltip="${game.i18n.localize(`${C.ID}.uiSettingsMenuHints.mover.reset`)}"><i class="fas fa-redo-alt"></i></div>
+                <div class="vsm-mover-text">
+                    <span class="vsm-mover-X">X: ${bar.offsetX}%</span>
+                    <span class="vsm-mover-Y">Y: ${bar.offsetY}%</span>
+                </div>
+                <div class="vsm-mover-grab"><i class="fas fa-arrows-up-down-left-right"></i></div>
+                <div class="vsm-mover-delete" data-tooltip="${game.i18n.localize(`${C.ID}.visualSettingsMenu.deleteBarTooltip`)}"><i class="fas fa-trash"></i></div>
+            </div>
+            <div class="vsm-mover-scale-container">
+                <span class="vsm-mover-scale">${game.i18n.localize(`${C.ID}.visualSettingsMenu.scale`)}: ${bar.scale}%</span>
+                <input type="range" name="scale" min="50" max="300" value="${bar.scale}">
+            </div>
+        `;
+
+        // Ресет положения
+        const moverReset = moverBody.querySelector('.vsm-mover-reset');
+        const defBar = PresetUIClass.newBar()
+        moverReset.addEventListener('click', () => {
+            barEl.style.left = `${defBar.offsetX}%`
+            barEl.style.top = `${defBar.offsetY}%`
+            barEl.style.scale = 1
+
+            const spanElX = moverBody.querySelector('.vsm-mover-X');
+            const spanElY = moverBody.querySelector('.vsm-mover-Y');
+            const scaleEl = moverBody.querySelector('.vsm-mover-scale');
+            spanElX.innerHTML = `X: ${defBar.offsetX}%`;
+            spanElY.innerHTML = `Y: ${defBar.offsetY}%`;
+            scaleEl.innerHTML = `${game.i18n.localize(`${C.ID}.visualSettingsMenu.scale`)}: ${defBar.scale}%`;
+
+            moverBody.style.transform = `translate(-50%, 0%)`;
+            moverBody.style.scale = 1;
+            moverBody.querySelector('input').value = defBar.scale;
+
+            document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
+        });
+
+        // Слушатели mover'а (та же математика перетаскивания, что у _getMoverEl, без per-side множителя -
+        // bar всегда позиционируется через обычный left, не right)
+        const grab = moverBody.querySelector('.vsm-mover-grab');
+        const spanElX = moverBody.querySelector('.vsm-mover-X');
+        const spanElY = moverBody.querySelector('.vsm-mover-Y');
+
+        let isDragging = false;
+        let startX, startY, initialX, initialY
+
+        grab.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = parseInt(barEl.style.left?.split("%")?.[0]) || 0;
+            initialY = parseInt(barEl.style.top?.split("%")?.[0]) || 0;
+            grab.style.cursor = 'grabbing';
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+
+        function onMouseMove(e) {
+            if (!isDragging) return;
+            const dx = Math.round(((e.clientX - startX) / window.innerWidth) * 100);
+            const dy = Math.round(((e.clientY - startY) / window.innerHeight) * 100);
+            const shiftPressed = e.shiftKey;
+            if (shiftPressed) {
+                if (Math.abs(dx) > Math.abs(dy)) {
+                    barEl.style.left = `${(initialX + dx)}%`;
+                    barEl.style.top = `${initialY}%`;
+                    spanElX.innerHTML = `X: ${initialX + dx}%`;
+                    spanElY.innerHTML = `Y: ${initialY}%`;
+                } else {
+                    barEl.style.top = `${initialY + dy}%`;
+                    barEl.style.left = `${(initialX)}%`;
+                    spanElX.innerHTML = `X: ${initialX}%`;
+                    spanElY.innerHTML = `Y: ${initialY + dy}%`;
+                }
+            } else {
+                barEl.style.top = `${initialY + dy}%`;
+                barEl.style.left = `${(initialX + dx)}%`;
+                spanElX.innerHTML = `X: ${initialX + dx}%`;
+                spanElY.innerHTML = `Y: ${initialY + dy}%`;
+            }
+        }
+
+        async function onMouseUp() {
+            isDragging = false;
+            grab.style.cursor = 'grab';
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+            document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
+        }
+
+        moverBody.querySelector('input[name="scale"]').addEventListener('input', function(event) {
+            barEl.style.scale = event.currentTarget.value / 100;
+            moverBody.querySelector('.vsm-mover-scale').textContent = `${game.i18n.localize(`${C.ID}.visualSettingsMenu.scale`)}: ${event.currentTarget.value}%`;
+            moverBody.style.transform = `translate(-50%, 0%) scale(${100 / event.currentTarget.value})`;
+            document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
+        });
+
+        // Удалить bar - из раскладки (preset.bars) и из живого содержимого (vnData.barsData) разом,
+        // это единственное место в интерфейсе, где bar можно удалить
+        moverBody.querySelector('.vsm-mover-delete').addEventListener('click', async () => {
+            await PresetUIClass.removeBar(curPreset.id, barId)
+            const settingData = getSettings()
+            const barsData = (settingData.barsData || []).filter(b => b.id !== barId)
+            await quickSettingsUpdate({ barsData }, { renderData: { renderParts: ["bars"] } })
+            moverBody.remove()
+        })
+
+        return moverBody;
+    }
+
     static async detailModeChanges(html, detailMode = true){
         const detailModeBuffer = game.settings.get(C.ID, "detailModeBuffer");
         // Включение/выключение сетки-рулетки и изменение z-index vn-body
@@ -994,11 +1147,21 @@ export class VisualSettingsMenu extends FormApplication {
         document.getElementById("vsm-mover-left")?.remove();
         document.getElementById("vsm-mover-right")?.remove();
         document.getElementById("vsm-mover-header")?.remove();
+        document.querySelectorAll('[id^="vsm-mover-bar-"]').forEach(el => el.remove());
         // Добавление/удаление mover'ов
         if (detailMode && detailModeBuffer.mode == "moveSliders") {
             document.getElementById("vn-left").appendChild(VisualSettingsMenu._getMoverEl("left"));
             document.getElementById("vn-right").appendChild(VisualSettingsMenu._getMoverEl("right"));
             document.getElementById("vn-header").appendChild(VisualSettingsMenu._getMoverEl("header"));
+            // По одному муверу на каждый bar активного пресета, у которого сейчас есть DOM-узел
+            // (bar может быть скрыт - см. barsAlwaysShow). Мувер вставляется ВНУТРЬ самого .vn-bar,
+            // как и у слайдеров (#vn-left/right/header) - так его translate(-50%, 0%) центрируется
+            // ровно над своим bar, а не над всем контейнером #vn-bars.
+            PresetUIClass.getActivePreset().bars.forEach(bar => {
+                const barMover = VisualSettingsMenu._getBarMoverEl(bar.id)
+                const barEl = document.querySelector(`.vn-bar[data-bar-id="${bar.id}"]`)
+                if (barMover && barEl) barEl.appendChild(barMover)
+            })
         }
 
         await game.settings.set(C.ID, "viewMode", detailMode);

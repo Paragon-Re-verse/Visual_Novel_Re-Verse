@@ -218,6 +218,12 @@ Hooks.once('init', function() {
     // Темп появления букв в режиме "Периодически" - символов в секунду. Тот же слайдер-паттерн, что и
     // flashLightSpeed/bgScrollSpeed выше, применяется в main.js (_playNarrativeText).
     registerSettings("narrativeTypeSpeed", "world", false, Number, 20, null, false, null, {min: 2, max: 60, step: 1})
+    // Скорость изменения значения горизонтальной шкалы (bar) - длительность CSS-transition
+    // заполнения в секундах, тот же паттерн, что у flashLightSpeed/bgScrollSpeed выше.
+    registerSettings("barChangeSpeed", "world", false, Number, 0.6, null, false, null, {min: 0.1, max: 3, step: 0.05})
+    // Показывать все заведённые в пресете bar всегда, либо скрывать конкретный bar до тех пор,
+    // пока ГМ впервые не поменяет его значение в панели "Эффекты" (см. vnData.bars, apps/effectsPanel.js)
+    registerSettings("barsAlwaysShow", "world", false, Boolean, true)
     // Плейсхолдер фона
     registerSettings("backgroundPlaceholder", "world", false, String, "modules/visual-novel-reverse/templates/assets/placeholderImage.webp", "image")
     // Дефолтная папка для поиска портретов
@@ -386,6 +392,13 @@ const defaultVnData = () => {
         lockExit: false,
         clockTime: "12:30",
         requests: [],
+        // Живое содержимое горизонтальных шкал (bar), заведённых в текущем UI-пресете
+        // (раскладка/позиция - PresetUIClass.bars, ключ "bars"; здесь - именно "barsData",
+        // чтобы не схлопнуться с preset.bars при спреде {...uiData, ...data} в _prepareContext).
+        // Элемент появляется здесь только когда ГМ впервые меняет его значение в панели
+        // "Эффекты" - см. barsAlwaysShow выше и apps/effectsPanel.js. {id, name, color, value,
+        // mode: "counter"|"timer", timerDurationSeconds, timerEndTimestamp}
+        barsData: [],
         weatherList: [
             {
                 name: game.i18n.localize(`${C.ID}.createWeather.unknownWeather`),

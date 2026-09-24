@@ -1,58 +1,95 @@
 <form class="vn-fx-panel flexcol">
+    <div class="vn-fx-panel-body flexrow">
+        <div class="vn-fx-effects-column flexcol">
 
-    <div class="vn-fx-section">
-        <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.targetLabel"}}</label>
-        <select class="vn-fx-target-select">
-            <option value="all">{{localize "visual-novel-reverse.effectsPanel.allActiveCharacters"}}</option>
-            {{#each targets as |t|}}
-                <option value="{{t.pos}}">{{t.name}}</option>
-            {{/each}}
-        </select>
+            <div class="vn-fx-section">
+                <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.targetLabel"}}</label>
+                <select class="vn-fx-target-select">
+                    <option value="all">{{localize "visual-novel-reverse.effectsPanel.allActiveCharacters"}}</option>
+                    {{#each targets as |t|}}
+                        <option value="{{t.pos}}">{{t.name}}</option>
+                    {{/each}}
+                </select>
+            </div>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-shake"><i class="fas fa-hand-fist"></i> {{localize "visual-novel-reverse.effectsPanel.shake"}}</button>
+            </div>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-flash-light"><i class="fas fa-sun"></i> {{localize "visual-novel-reverse.effectsPanel.flashLight"}}</button>
+                <button type="button" class="vn-fx-flash-dark"><i class="fas fa-moon"></i> {{localize "visual-novel-reverse.effectsPanel.flashDark"}}</button>
+            </div>
+
+            <hr/>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-toggle-darken{{#if darkenBack}} vn-fx-active{{/if}}">
+                    <i class="fas fa-circle-half-stroke"></i> {{localize "visual-novel-reverse.effectsPanel.darkenBackground"}}
+                </button>
+                <button type="button" class="vn-fx-toggle-row{{#if rowMode}} vn-fx-active{{/if}}">
+                    <i class="fas fa-grip-lines"></i> {{localize "visual-novel-reverse.effectsPanel.rowMode"}}
+                </button>
+            </div>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-bgscroll-toggle{{#if bgScroll}} vn-fx-active{{/if}}">
+                    <i class="fas fa-arrows-left-right"></i> {{localize "visual-novel-reverse.effectsPanel.scrollBackground"}}
+                </button>
+                <button type="button" class="vn-fx-blur-toggle{{#if bgBlur}} vn-fx-active{{/if}}">
+                    <i class="fas fa-droplet"></i> {{localize "visual-novel-reverse.effectsPanel.blurBackground"}}
+                </button>
+            </div>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-narrative">
+                    <i class="fas fa-align-center"></i> {{localize "visual-novel-reverse.effectsPanel.narrative"}}
+                </button>
+            </div>
+
+            <hr/>
+
+            <div class="vn-fx-section vn-fx-row">
+                <button type="button" class="vn-fx-toggle-lockexit{{#if lockExit}} vn-fx-active{{/if}}">
+                    <i class="fas fa-lock"></i> {{localize "visual-novel-reverse.effectsPanel.lockExitForPlayers"}}
+                </button>
+            </div>
+
+            <p class="vn-fx-hint">{{localize "visual-novel-reverse.effectsPanel.hint"}}</p>
+
+        </div>
+
+        <div class="vn-fx-bars-column flexcol">
+            <label class="vn-fx-label">{{localize "visual-novel-reverse.effectsPanel.barsColumnTitle"}}</label>
+            {{#if bars.length}}
+                {{#each bars}}
+                    <div class="vn-fx-bar-row" data-bar-id="{{this.id}}">
+                        <div class="vn-fx-bar-row-top flexrow">
+                            <input type="text" data-key="name" value="{{this.name}}" placeholder="{{localize "visual-novel-reverse.effectsPanel.barNamePlaceholder"}}">
+                            <input type="color" data-key="color" value="{{this.color}}">
+                            <select data-key="mode">
+                                <option value="counter" {{#unless this.isTimer}}selected{{/unless}}>{{localize "visual-novel-reverse.effectsPanel.barModeCounter"}}</option>
+                                <option value="timer" {{#if this.isTimer}}selected{{/if}}>{{localize "visual-novel-reverse.effectsPanel.barModeTimer"}}</option>
+                            </select>
+                        </div>
+                        {{#if this.isTimer}}
+                            <div class="vn-fx-bar-row-bottom flexrow">
+                                <input type="number" class="vn-fx-bar-timer-part" data-key="timerH" min="0" max="99" value="{{this.timerH}}">:
+                                <input type="number" class="vn-fx-bar-timer-part" data-key="timerM" min="0" max="59" value="{{this.timerM}}">:
+                                <input type="number" class="vn-fx-bar-timer-part" data-key="timerS" min="0" max="59" value="{{this.timerS}}">
+                                <button type="button" class="vn-fx-bar-timer-start"><i class="fas fa-play"></i> {{localize "visual-novel-reverse.effectsPanel.barTimerStart"}}</button>
+                            </div>
+                        {{else}}
+                            <div class="vn-fx-bar-row-bottom flexrow">
+                                <input type="range" min="0" max="100" step="1" data-key="value" value="{{this.value}}">
+                                <span class="vn-fx-bar-value-readout">{{this.value}}%</span>
+                            </div>
+                        {{/if}}
+                    </div>
+                {{/each}}
+            {{else}}
+                <p class="vn-fx-hint">{{localize "visual-novel-reverse.effectsPanel.noBarsHint"}}</p>
+            {{/if}}
+        </div>
     </div>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-shake"><i class="fas fa-hand-fist"></i> {{localize "visual-novel-reverse.effectsPanel.shake"}}</button>
-    </div>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-flash-light"><i class="fas fa-sun"></i> {{localize "visual-novel-reverse.effectsPanel.flashLight"}}</button>
-        <button type="button" class="vn-fx-flash-dark"><i class="fas fa-moon"></i> {{localize "visual-novel-reverse.effectsPanel.flashDark"}}</button>
-    </div>
-
-    <hr/>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-toggle-darken{{#if darkenBack}} vn-fx-active{{/if}}">
-            <i class="fas fa-circle-half-stroke"></i> {{localize "visual-novel-reverse.effectsPanel.darkenBackground"}}
-        </button>
-        <button type="button" class="vn-fx-toggle-row{{#if rowMode}} vn-fx-active{{/if}}">
-            <i class="fas fa-grip-lines"></i> {{localize "visual-novel-reverse.effectsPanel.rowMode"}}
-        </button>
-    </div>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-bgscroll-toggle{{#if bgScroll}} vn-fx-active{{/if}}">
-            <i class="fas fa-arrows-left-right"></i> {{localize "visual-novel-reverse.effectsPanel.scrollBackground"}}
-        </button>
-        <button type="button" class="vn-fx-blur-toggle{{#if bgBlur}} vn-fx-active{{/if}}">
-            <i class="fas fa-droplet"></i> {{localize "visual-novel-reverse.effectsPanel.blurBackground"}}
-        </button>
-    </div>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-narrative">
-            <i class="fas fa-align-center"></i> {{localize "visual-novel-reverse.effectsPanel.narrative"}}
-        </button>
-    </div>
-
-    <hr/>
-
-    <div class="vn-fx-section vn-fx-row">
-        <button type="button" class="vn-fx-toggle-lockexit{{#if lockExit}} vn-fx-active{{/if}}">
-            <i class="fas fa-lock"></i> {{localize "visual-novel-reverse.effectsPanel.lockExitForPlayers"}}
-        </button>
-    </div>
-
-    <p class="vn-fx-hint">{{localize "visual-novel-reverse.effectsPanel.hint"}}</p>
-
 </form>

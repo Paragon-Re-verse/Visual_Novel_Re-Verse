@@ -1,5 +1,6 @@
 import { Constants as C, getSettings, quickSettingsUpdate, peekSetting } from '../scripts/const.js';
 import { triggerVNEffect, triggerNarrativeText } from '../scripts/main.js';
+import { PresetUIClass } from '../scripts/presetUIClass.js';
 
 // Окно "Эффекты" — быстрый доступ ГМ к визуальным эффектам поверх окна визуальной новеллы:
 // - Тряска спрайта (одного выбранного или всех активных сразу)
@@ -20,7 +21,7 @@ export class EffectsPanel extends FormApplication {
         const defaults = super.defaultOptions;
         const overrides = {
             classes: ['vn-fx-panel-body'],
-            width: 320,
+            width: 640,
             height: "auto",
             resizable: false,
             id: "EffectsPanel",
@@ -41,6 +42,29 @@ export class EffectsPanel extends FormApplication {
             .map(t => ({ pos: t.pos, name: t.speaker.name || t.pos }))
     }
 
+    // Список bar активного UI-пресета (раскладка) + их живое содержимое из vnData.barsData
+    // (если содержимого ещё нет - bar ни разу не редактировался, показываем значения по умолчанию;
+    // сам факт отсутствия записи в barsData - это и есть "скрыт до первого изменения", см. main.js)
+    _getBarsData(settingData = getSettings()) {
+        const preset = PresetUIClass.getActivePreset()
+        const barsContent = settingData.barsData || []
+        return preset.bars.map(layout => {
+            const content = barsContent.find(b => b.id === layout.id) || {}
+            const totalSeconds = content.timerDurationSeconds || 0
+            return {
+                id: layout.id,
+                name: content.name || "",
+                color: content.color || "#a33636",
+                value: content.value ?? 0,
+                mode: content.mode || "counter",
+                isTimer: content.mode === "timer",
+                timerH: Math.floor(totalSeconds / 3600),
+                timerM: Math.floor((totalSeconds % 3600) / 60),
+                timerS: totalSeconds % 60,
+            }
+        })
+    }
+
     getData(options) {
         const settingData = getSettings()
         return {
@@ -50,6 +74,7 @@ export class EffectsPanel extends FormApplication {
             bgScroll: !!settingData.bgScroll,
             bgBlur: !!settingData.bgBlur,
             lockExit: !!settingData.lockExit,
+            bars: this._getBarsData(settingData),
         }
     }
 
@@ -145,6 +170,64 @@ export class EffectsPanel extends FormApplication {
             event.preventDefault()
             await quickSettingsUpdate({ lockExit: !peekSetting("lockExit") }, { renderData: { renderParts: ["foreground"] } })
             event.currentTarget.classList.toggle('vn-fx-active', !!getSettings().lockExit)
+        })
+
+        // --- Горизонтальные шкалы (bar) - отдельная колонка. Раскладка (позиция/масштаб) заведена
+        // в UI customization/detailed mode (PresetUIClass.bars) - здесь редактируется только живое
+        // содержимое (vnData.barsData), по одной строке на bar. Первое изменение любого поля создаёт
+        // запись в barsData (bar перестаёт быть скрытым, если barsAlwaysShow выключен) - см. main.js
+        // _preparePartContext "bars" case. ---
+        html[0].querySelectorAll('.vn-fx-bar-row').forEach(rowEl => {
+            const barId = rowEl.dataset.barId
+
+            // patch - изменяемые поля bar. Если записи ещё нет в barsData - это структурное появление
+            // нового узла .vn-bar в VN-окне, нужен renderParts:["bars"] один раз. Если запись уже
+            // есть - только значение/цвет меняются на уже существующем узле (see main.js
+            // _applyBarVisualState, вызывается из Hooks.on("updateSetting", ...) без renderParts,
+            // чтобы CSS transition плавно анимировал изменение, а не дёргался пересозданным узлом).
+            const upsertBar = async (patch) => {
+                const settingData = getSettings()
+                const barsData = foundry.utils.deepClone(settingData.barsData || [])
+                let bar = barsData.find(b => b.id === barId)
+                const isNew = !bar
+                if (!bar) {
+                    bar = { id: barId, name: "", color: "#a33636", value: 0, mode: "counter", timerDurationSeconds: 0, timerEndTimestamp: null }
+                    barsData.push(bar)
+                }
+                Object.assign(bar, patch)
+                await quickSettingsUpdate({ barsData }, isNew ? { renderData: { renderParts: ["bars"] } } : {})
+            }
+
+            rowEl.querySelector('[data-key="name"]')?.addEventListener('change', (event) => {
+                upsertBar({ name: event.currentTarget.value })
+            })
+            rowEl.querySelector('[data-key="color"]')?.addEventListener('change', (event) => {
+                upsertBar({ color: event.currentTarget.value })
+            })
+            // "input" стреляет на каждый пиксель протаскивания ползунка - пишем в settings только
+            // на "change" (отпускание), иначе на один драг ушла бы пачка записей game.settings.set
+            // подряд. Пока тащим - только обновляем текстовый индикатор локально, без записи.
+            const valueInputEl = rowEl.querySelector('[data-key="value"]')
+            const valueReadoutEl = rowEl.querySelector('.vn-fx-bar-value-readout')
+            valueInputEl?.addEventListener('input', (event) => {
+                if (valueReadoutEl) valueReadoutEl.textContent = `${event.currentTarget.value}%`
+            })
+            valueInputEl?.addEventListener('change', (event) => {
+                upsertBar({ mode: "counter", value: Math.max(0, Math.min(100, Number(event.currentTarget.value) || 0)) })
+            })
+            rowEl.querySelector('[data-key="mode"]')?.addEventListener('change', async (event) => {
+                await upsertBar({ mode: event.currentTarget.value })
+                // Переключение counter/timer меняет, какие поля показаны в самой панели - надо
+                // перерисовать панель (не VN-окно, там достаточно нового значения displayValue)
+                this.render()
+            })
+            rowEl.querySelector('.vn-fx-bar-timer-start')?.addEventListener('click', () => {
+                const h = Number(rowEl.querySelector('[data-key="timerH"]')?.value) || 0
+                const m = Number(rowEl.querySelector('[data-key="timerM"]')?.value) || 0
+                const s = Number(rowEl.querySelector('[data-key="timerS"]')?.value) || 0
+                const totalSeconds = Math.max(1, h * 3600 + m * 60 + s)
+                upsertBar({ mode: "timer", timerDurationSeconds: totalSeconds, timerEndTimestamp: Date.now() + totalSeconds * 1000, value: 100 })
+            })
         })
     }
 
