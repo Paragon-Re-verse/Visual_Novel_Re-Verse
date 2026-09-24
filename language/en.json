@@ -123,7 +123,11 @@
             "reloadPromtBody": "You and the selected player need to reload the FoundryVTT page for the changes to take effect. Do you want to do this now?",
             "reloading": "Reloading FoundryVTT...",
             "buttonsCustomizerMenu": "Quick access buttons",
-            "buttonsCustomizerMenuHint": "Customize the list of quick-access buttons (icon, action, who can press it) available to the GM/players. See the module guide for details."
+            "buttonsCustomizerMenuHint": "Customize the list of quick-access buttons (icon, action, who can press it) available to the GM/players. See the module guide for details.",
+            "barChangeSpeed": "Bar fill change speed",
+            "barChangeSpeedHint": "Duration of the smooth fill animation when a bar's value changes (Effects panel), in seconds",
+            "barsAlwaysShow": "Always show bars",
+            "barsAlwaysShowHint": "If enabled, every bar added in UI customization is shown immediately. If disabled, a bar stays hidden until the GM changes its value for the first time in the Effects panel"
         },
         "toolbar": {
             "openVN": "Open Visual Novel window",
@@ -422,7 +426,9 @@
                 "cancel": "Cancel",
                 "exit": "Return",
                 "noneWIP": "< WIP >"
-            }
+            },
+            "addBarTooltip": "Add a bar",
+            "deleteBarTooltip": "Delete bar"
         },
         "portraitsMaker": {
             "tokenImage": "Token image",
@@ -686,7 +692,13 @@
             "hint": "Shake and flashes apply to the target selected above. Darken background, row mode, scroll background, blur background and lock exit are toggles shared by all players.",
             "narrativeDialogTitle": "Text",
             "narrativePlaceholder": "New line - new page",
-            "confirm": "Confirm"
+            "confirm": "Confirm",
+            "barsColumnTitle": "Bars",
+            "barNamePlaceholder": "Name (optional)",
+            "barModeCounter": "Counter",
+            "barModeTimer": "Timer",
+            "barTimerStart": "Start",
+            "noBarsHint": "No bars in the current UI preset yet. Add one from the \"UI customization\" tile in the Visual Settings Menu."
         },
         "dataActions": {
             "hideVN": "Toggle the Visual Novel window display",

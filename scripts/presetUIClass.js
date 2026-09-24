@@ -63,6 +63,35 @@ export class PresetUIClass {
             {"key": "weather", "active": true, flex: 80},
             {"key": "temperature", "active": true, flex: 80}
         ]
+        // Горизонтальные шкалы (bar) - только раскладка (позиция/масштаб на экране).
+        // Содержимое (название/цвет/значение/режим) живёт отдельно, в vnData.bars,
+        // и редактируется из панели "Эффекты" (то же разделение, что у slotCount/masterSlot
+        // здесь против activeSpeakers в vnData - раскладка отдельно от живого состояния).
+        this.bars = []
+    }
+
+    static newBar(data = {}) {
+        return {
+            id: data.id || foundry.utils.randomID(),
+            // left/top в %, та же плоская конвенция позиционирования, что у headerSlider (не center-relative) -
+            // так detailed mode переиспользует ровно ту же математику мувера, что у header/left/right слайдеров,
+            // без отдельного множителя. Дефолт - примерно верхний центр экрана, не сразу за верхним краем.
+            offsetX: data.offsetX ?? 35,
+            offsetY: data.offsetY ?? 15,
+            scale: data.scale ?? 100,
+        }
+    }
+
+    static async addBar(presetId) {
+        const preset = PresetUIClass.getPreset(presetId)
+        const bar = PresetUIClass.newBar()
+        await PresetUIClass.updatePreset(presetId, {bars: [...preset.bars, bar]})
+        return bar.id
+    }
+
+    static async removeBar(presetId, barId) {
+        const preset = PresetUIClass.getPreset(presetId)
+        await PresetUIClass.updatePreset(presetId, {bars: preset.bars.filter(b => b.id !== barId)})
     }
 
     static async addPreset(data = {}) {

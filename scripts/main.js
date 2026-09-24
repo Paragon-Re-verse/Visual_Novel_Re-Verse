@@ -15,7 +15,7 @@ export const _portraitPartsKeys = (fullslots = false) => {
         return [...acc, ...numbersArr.slice(0, slotCount[side]).map(num => `${side}${num}Portrait`)]
     }, [])
 }
-const _appPartsKey = (fullslots = false) => ["headerSlider", "background", "leftSlider", "rightSlider", "editWindow", "foreground", ..._portraitPartsKeys(fullslots)] 
+const _appPartsKey = (fullslots = false) => ["headerSlider", "background", "leftSlider", "rightSlider", "editWindow", "bars", "foreground", ..._portraitPartsKeys(fullslots)]
 const _getAppParts = (fullslots = false) => _appPartsKey(fullslots).reduce((acc, part) => {
     acc[part] = {template: `modules/${C.ID}/templates/mainApp/${(part.includes("Portrait") ? "portrait" : (["leftSlider", "rightSlider"].includes(part)) ? "slider" : part)}.hbs`}
     return acc
@@ -294,6 +294,27 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                 }
                 // +editWindowClass, activeSpeakers
                 break;
+            case "bars":
+                // Раскладка (позиция/масштаб) - context.bars, пришла через ...uiData (PresetUIClass.bars).
+                // Живое содержимое (название/цвет/значение/режим) - settingData.barsData, отдельная
+                // настройка vnData, редактируется из панели "Эффекты" (apps/effectsPanel.js).
+                const barsAlwaysShow = game.settings.get(C.ID, "barsAlwaysShow")
+                const barsLayout = context.bars || []
+                const barsContent = settingData.barsData || []
+                const bars = barsLayout.reduce((acc, layout) => {
+                    const barContent = barsContent.find(b => b.id === layout.id)
+                    // Bar скрыт, пока ГМ ни разу не поменял его значение в панели "Эффекты"
+                    // (нет записи в barsData) - если только не включено "Всегда показывать bar"
+                    if (!barContent && !barsAlwaysShow) return acc
+                    const merged = barContent || { id: layout.id, name: "", color: "#a33636", value: 0, mode: "counter" }
+                    const displayValue = (merged.mode == "timer" && merged.timerEndTimestamp)
+                        ? Math.max(0, Math.min(100, ((merged.timerEndTimestamp - Date.now()) / (merged.timerDurationSeconds * 1000)) * 100))
+                        : Math.max(0, Math.min(100, Number(merged.value) || 0))
+                    acc.push({ ...layout, ...merged, displayValue })
+                    return acc
+                }, [])
+                context = { ...context, bars, barChangeSpeed: game.settings.get(C.ID, "barChangeSpeed") }
+                break;
             case "slider":
                 // +offset(uiData), +pFieldClass, 
                 const masterSlotPos = getMasterSlot(side, context._uiData)
@@ -530,6 +551,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
         // больше НЕ запрашивает renderParts:["background"] - вместо этого Hooks.on("updateSetting", ...)
         // ниже по файлу вызывает эту функцию напрямую на уже существующем узле.
         _applyBackgroundVisualEffects()
+        _applyBarVisualState()
     }
 
     // DragDrop
@@ -1746,6 +1768,67 @@ function _applyBackgroundVisualEffects() {
     bgImgEl.style.filter = blurOn ? `blur(${(blurStrength * MAX_BLUR_PX).toFixed(2)}px)` : ""
 }
 
+// Применяет к УЖЕ СУЩЕСТВУЮЩИМ .vn-bar узлам новое значение/цвет/название, читая их из vnData.barsData -
+// без Handlebars-рендера части "bars", тем же приёмом, что и _applyBackgroundVisualEffects() выше
+// (иначе CSS transition заполнения не анимируется на только что пересозданном узле). Если для bar ещё
+// нет DOM-узла (он только что создан ГМом в панели "Эффекты" - структурное изменение), эта функция его
+// не создаёт - для этого panel явно просит renderParts:["bars"] один раз при создании записи в barsData.
+function _applyBarVisualState() {
+    const settingData = getSettings()
+    const uiData = PresetUIClass.getActivePreset()
+    const barsContent = settingData.barsData || []
+    uiData.bars.forEach(layout => {
+        const barEl = document.querySelector(`.vn-bar[data-bar-id="${layout.id}"]`)
+        if (!barEl) return
+        const content = barsContent.find(b => b.id === layout.id)
+        if (!content) return
+        // data-bar-mode может смениться без структурного ре-рендера части "bars" (переключение
+        // counter/timer в панели "Эффекты" меняет только данные, не DOM) - держим атрибут в
+        // актуальном состоянии, иначе тикающий раз в секунду таймер (ниже по файлу) не найдёт узел
+        barEl.dataset.barMode = content.mode || "counter"
+        const displayValue = (content.mode == "timer" && content.timerEndTimestamp)
+            ? Math.max(0, Math.min(100, ((content.timerEndTimestamp - Date.now()) / (content.timerDurationSeconds * 1000)) * 100))
+            : Math.max(0, Math.min(100, Number(content.value) || 0))
+        const fillEl = barEl.querySelector(".vn-bar-fill")
+        if (fillEl) {
+            fillEl.style.width = `${displayValue}%`
+            fillEl.style.backgroundColor = content.color || "#a33636"
+        }
+        let nameEl = barEl.querySelector(".vn-bar-name")
+        if (content.name) {
+            if (!nameEl) {
+                nameEl = document.createElement("span")
+                nameEl.className = "vn-bar-name"
+                barEl.prepend(nameEl)
+            }
+            nameEl.textContent = content.name
+        } else if (nameEl) {
+            nameEl.remove()
+        }
+    })
+}
+
+// Тик таймерных bar (режим "Таймер" - ГМ задаёт ЧЧ:ММ:СС в панели "Эффекты", main.js хранит только
+// абсолютную метку окончания timerEndTimestamp в vnData.barsData, см. apps/effectsPanel.js). Каждый
+// клиент раз в секунду локально пересчитывает % из этой метки и применяет к уже существующему узлу -
+// без записи в settings на каждый тик (дорого и не нужно - у всех клиентов и так одна и та же метка
+// окончания, локальный пересчёт синхронен без какого-либо сетевого обмена). Единственный интервал на
+// весь модуль, не завязан на открытие/закрытие VN-окна - безопасно ничего не делает (querySelectorAll
+// вернёт пустой список), пока в DOM нет ни одного bar в режиме "timer".
+setInterval(() => {
+    const timerBarEls = document.querySelectorAll('.vn-bar[data-bar-mode="timer"]')
+    if (!timerBarEls.length) return
+    const settingData = getSettings()
+    const barsContent = settingData.barsData || []
+    timerBarEls.forEach(barEl => {
+        const content = barsContent.find(b => b.id === barEl.dataset.barId)
+        if (!content || content.mode !== "timer" || !content.timerEndTimestamp) return
+        const pct = Math.max(0, Math.min(100, ((content.timerEndTimestamp - Date.now()) / (content.timerDurationSeconds * 1000)) * 100))
+        const fillEl = barEl.querySelector(".vn-bar-fill")
+        if (fillEl) fillEl.style.width = `${pct}%`
+    })
+}, 1000)
+
 // Одноразовое применение эффекта (тряска / вспышка) прямо в DOM, локально на этом клиенте
 // kind: "shake" | "flashLight" | "flashDark"
 // target: "all" - на все активные спрайты (или во весь экран для вспышек) - либо позиция вида "left1"
@@ -2026,6 +2109,9 @@ Hooks.on("updateSetting", async (setting, value, diff, userId) => {
         // vnData (дёшево и идемпотентно, no-op если узла ещё нет в DOM), а не только для тех, что явно
         // просят renderParts:["background"].
         _applyBackgroundVisualEffects()
+        // То же самое для bar (панель "Эффекты") - плавную анимацию заполнения нельзя получить на
+        // узле, пересозданном Handlebars-рендером части "bars", см. _applyBarVisualState() ниже.
+        _applyBarVisualState()
         if (diff?.renderData) VisualNovelDialogues._render(diff.renderData.renderParts, diff.renderData.fullRender)
     }
 
