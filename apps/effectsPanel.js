@@ -20,7 +20,12 @@ export class EffectsPanel extends FormApplication {
     static get defaultOptions() {
         const defaults = super.defaultOptions;
         const overrides = {
-            classes: ['vn-fx-panel-body'],
+            // Класс окна-приложения (Application root) - НЕ переиспользовать имя 'vn-fx-panel-body':
+            // это имя уже занято внутренним flex-рядом в templates/effectsPanel.hbs, и CSS-правило
+            // .vn-fx-panel-body { align-items: flex-start } писалось именно для него. Совпадение
+            // имён приводило к тому, что то же правило утекало и на корень окна, сжимая
+            // .window-header (родитель заголовка и кнопки Close) вместо растягивания на всю ширину.
+            classes: ['vn-fx-panel-app'],
             width: 640,
             height: "auto",
             resizable: false,
@@ -177,6 +182,17 @@ export class EffectsPanel extends FormApplication {
         // содержимое (vnData.barsData), по одной строке на bar. Первое изменение любого поля создаёт
         // запись в barsData (bar перестаёт быть скрытым, если barsAlwaysShow выключен) - см. main.js
         // _preparePartContext "bars" case. ---
+
+        // Добавить новый bar прямо отсюда, не выходя в UI customization (раньше это был единственный
+        // путь - долгий и неочевидный для панели, которой пользуются "по ходу игры"). Раскладка
+        // получает дефолтную позицию/масштаб (см. PresetUIClass.newBar) - подправить её можно в
+        // detailed mode, как и у любого другого bar.
+        html[0].querySelector('.vn-fx-bar-add-button')?.addEventListener('click', async () => {
+            const preset = PresetUIClass.getActivePreset()
+            await PresetUIClass.addBar(preset.id)
+            this.render()
+        })
+
         html[0].querySelectorAll('.vn-fx-bar-row').forEach(rowEl => {
             const barId = rowEl.dataset.barId
 

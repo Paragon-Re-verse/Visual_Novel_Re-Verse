@@ -103,11 +103,17 @@ Hooks.once('init', function() {
         restricted: true,
         'type': ButtonsCustomizer,
     });
+    // default здесь - [] , а не DefaultButton.defauldButtonList(): та функция сама вызывает
+    // game.i18n.localize() для названий кнопок, а registerSettings-регистрация выполняется внутри
+    // Hooks.once('init', ...) - переводы модуля на этой стадии ещё не загружены (см. bgScrollDirection
+    // и другие choices ниже) - результат застрял бы в default навсегда как сырые ключи. Реальный
+    // дефолтный набор кнопок сеется позже, в Hooks.on("ready", ...) ниже по файлу, когда переводы уже
+    // точно готовы.
     game.settings.register(C.ID, "buttonsList", {
         scope: "world",
         type: Array,
         config: false,
-        default: DefaultButton.defauldButtonList().map(button => ({...button})),
+        default: [],
     });
 
     const registerSettings = (key, _scope = 'world', _config = true, _type = Boolean, _default = true, _filePicker = null, reRender = false, choices = null, range = null) => {
@@ -197,10 +203,15 @@ Hooks.once('init', function() {
     // сам переключатель хранится в vnData.bgScroll (см. defaultVnData ниже), а вот В КАКУЮ СТОРОНУ и
     // ЗАЦИКЛЕНА ЛИ анимация - это две настройки ГМа отсюда, из меню "Настройки эффектов"
     // (apps/visualSettingsMenu.js, effectsSettingsKeys), рядом с flashLightSpeed/flashDarkSpeed.
-    // choices здесь - {key: "показываемый текст кнопки"}, settingsArray()/visualSettingsMenu.hbs рисует
-    // из них не выпадающий список, а пару кнопок-переключателей (см. .vsm-choice-button)
-    registerSettings("bgScrollDirection", "world", false, String, "right", null, false, {left: game.i18n.localize(`${C.ID}.settings.bgScrollDirectionLeft`), right: game.i18n.localize(`${C.ID}.settings.bgScrollDirectionRight`)})
-    registerSettings("bgScrollLoop", "world", false, String, "end", null, false, {end: game.i18n.localize(`${C.ID}.settings.bgScrollLoopEnd`), cycle: game.i18n.localize(`${C.ID}.settings.bgScrollLoopCycle`)})
+    // choices здесь - {key: "i18n-ключ показываемого текста"}, НЕ сам текст: registerSettings()
+    // вызывается внутри Hooks.once('init', ...) - это самая ранняя стадия загрузки Foundry, переводы
+    // модуля ещё не подгружены (game.i18n готов только к хуку 'i18nInit', см. официальную документацию
+    // хуков) - localize() здесь молча вернул бы сырой ключ. Поэтому храним сами ключи, а резолвим их
+    // в settingsArray() (apps/visualSettingsMenu.js) в момент отрисовки - там переводы уже точно готовы.
+    // settingsArray()/visualSettingsMenu.hbs рисует из них не выпадающий список, а пару
+    // кнопок-переключателей (см. .vsm-choice-button)
+    registerSettings("bgScrollDirection", "world", false, String, "right", null, false, {left: `${C.ID}.settings.bgScrollDirectionLeft`, right: `${C.ID}.settings.bgScrollDirectionRight`})
+    registerSettings("bgScrollLoop", "world", false, String, "end", null, false, {end: `${C.ID}.settings.bgScrollLoopEnd`, cycle: `${C.ID}.settings.bgScrollLoopCycle`})
     // Скорость (длительность полного прохода, в секундах) прокрутки фона - тот же слайдер-паттерн, что и
     // flashLightSpeed/flashDarkSpeed выше, применяется в main.js (_onRender) как animationDuration поверх
     // CSS-анимации. Дефолт (45s) совпадает с исходной хардкод-длительностью CSS, чтобы поведение не
@@ -214,7 +225,7 @@ Hooks.once('init', function() {
     // Режим показа текста в эффекте "Нарратив" (панель "Эффекты") - "Моментально" (вся страница сразу)
     // или "Периодически" (по буквам, см. narrativeTypeSpeed ниже) - тот же паттерн кнопок-переключателей,
     // что у bgScrollDirection/bgScrollLoop выше.
-    registerSettings("narrativeTextMode", "world", false, String, "instant", null, false, {instant: game.i18n.localize(`${C.ID}.settings.narrativeTextModeInstant`), periodic: game.i18n.localize(`${C.ID}.settings.narrativeTextModePeriodic`)})
+    registerSettings("narrativeTextMode", "world", false, String, "instant", null, false, {instant: `${C.ID}.settings.narrativeTextModeInstant`, periodic: `${C.ID}.settings.narrativeTextModePeriodic`})
     // Темп появления букв в режиме "Периодически" - символов в секунду. Тот же слайдер-паттерн, что и
     // flashLightSpeed/bgScrollSpeed выше, применяется в main.js (_playNarrativeText).
     registerSettings("narrativeTypeSpeed", "world", false, Number, 20, null, false, null, {min: 2, max: 60, step: 1})
@@ -280,8 +291,6 @@ Hooks.once('init', function() {
     registerSettings("discordBotLocalization", "world", false, Object, {ru: localizeConsts.discordGuide.ru, en: localizeConsts.discordGuide.en})
     // Права игроков
     registerSettings("playersPermissions", "world", false, Object, defaultPermissions, null, true)
-    // Наборы
-    registerSettings("assetPacks", "world", false, Object, {locationPacks: [], portraitPacks: []}, null, true)
     // Настройки для автосоздания Портретов
     registerSettings("autoPortraitSettings", "world", false, Object, defaultPortraitSettings)
     // Использовать группу настроек для автосоздания Портретов для остальных групп
@@ -520,6 +529,13 @@ Hooks.on("ready", async () => {
         } else {
             console.log("Presets checked ✔")
         }
+        // Заполняем buttonsList дефолтным набором кнопок при первом запуске мира - см. комментарий
+        // у registerSettings("buttonsList", ...) выше (localize() там раньше резолвился до загрузки
+        // переводов и застревал сырыми ключами; здесь, в ready, переводы уже готовы)
+        if (!game.settings.get(C.ID, "buttonsList").length) {
+            await game.settings.set(C.ID, "buttonsList", DefaultButton.defauldButtonList().map(button => ({...button})))
+            console.log("Default buttonsList seeded ✔")
+        }
         // Бекап
         if (game.settings.get(C.ID, "makesBackup")) {
             await createBackup();
@@ -636,12 +652,19 @@ function pushControlButtons(controls){
         visible: true,
         activeTool: "openVN",
         tools: {
+            // Единственный НЕ-button (настоящий переключаемый) tool в группе - Foundry v13 не может
+            // активировать (canvas.activateLayer) группу, целиком состоящую из button:true
+            // одноразовых действий: клик по вкладке визуально подсвечивался, но ui.controls.control
+            // оставался прежним ("tokens"), и ни один из 5 тулов не становился доступен - тихо, без
+            // ошибок в консоли. openVN и так семантически бинарный (открыт/закрыт), поэтому именно
+            // он стал toggle с activeTool, указывающим на него, вместо отдельного тула-заглушки.
             openVN: {
                 name: "openVN",
                 title: game.i18n.localize(`${C.ID}.toolbar.openVN`),
                 icon: "fas fa-window-maximize",
                 visible: true,
-                button: true,
+                toggle: true,
+                active: getSettings().showVN,
                 order: 0,
                 onChange: () => { VisualNovelDialogues.toggleVN() }
             },

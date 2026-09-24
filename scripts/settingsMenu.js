@@ -84,7 +84,7 @@ export class RestoreFromBackup extends FormApplication {
             resizable: false,
             id: `${foundry.utils.randomID()}`,
             template: `modules/${C.ID}/templates/restoreFromBackup.hbs`,
-            title: `RestoreFromBackup`,
+            title: game.i18n.localize(`${C.ID}.settings.restoreFromBackup`),
             userId: game.userId,
             closeOnSubmit: true,
             submitOnChange: false
@@ -284,7 +284,7 @@ export class CustomSlidersSet extends FormApplication {
             })
             content+=`</form>`
             new Dialog({
-                title: 'Custom sliders set Settings',
+                title: game.i18n.localize(`${C.ID}.customSliders.editDialogTitle`),
                 content: content,
                 buttons: {
                     common: { icon: '<i class="fas fa-check"></i>', label: game.i18n.localize(`${C.ID}.customSliders.confirm`), callback: async (html) => {
@@ -399,51 +399,3 @@ export class PlayersPermissions extends FormApplication {
     }
 }
 
-export class AssetPacksSelectMenu extends FormApplication {
-    constructor(showLocations = true, showPortraits = true) {
-        super();
-        this.category = "assetPacksSelectMenu";
-        this.showLocations = showLocations;
-        this.showPortraits = showPortraits;
-    }
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            'classes': ['form'],
-            'popOut': true,
-            'template': `modules/${C.ID}/templates/assetPacksSelectMenu.hbs`,
-            'id': `${C.ID}-asset-packs-select-menu`,
-            'title': 'Asset packs select menu',
-            'width': 'auto',
-            'height': 'auto',
-            'closeOnSubmit': true
-        });
-    }
-
-    getData() {
-        let packs = foundry.utils.deepClone(game.settings.get(C.ID, 'assetPacks'))
-        packs.portraitPacks.forEach((pack) => { pack.count = pack.ids.length })
-        packs.locationPacks.forEach((pack) => { pack.count = pack.ids.length })
-        return { ...packs, showLocations: this.showLocations, showPortraits: this.showPortraits };
-    }
-
-    activateListeners(html) {
-        super.activateListeners(html);
-        html.find('.apsm-submit-button').on('click', async () => {
-            const settings = foundry.utils.deepClone(game.settings.get(C.ID, 'assetPacks'))
-            if (this.showLocations) {
-                const checkedPortraitInputs = html[0].querySelectorAll('.apsm-input.aspm-locInput input:checked')
-                const activeIds = Array.from(checkedPortraitInputs).map(el => el.dataset.id)
-                settings.portraitPacks.forEach((pack) => { pack.active = activeIds.includes(pack.id) })
-            }
-            if (this.showPortraits) {
-                const checkedPortraitInputs = html[0].querySelectorAll('.apsm-input.aspm-portraitInput input:checked')
-                const activeIds = Array.from(checkedPortraitInputs).map(el => el.dataset.id)
-                settings.portraitPacks.forEach((pack) => { pack.active = activeIds.includes(pack.id) })
-            }
-            await game.settings.set(C.ID, 'assetPacks', settings)
-        })
-    }
-
-    async _updateObject(event, formData) {
-    }
-}

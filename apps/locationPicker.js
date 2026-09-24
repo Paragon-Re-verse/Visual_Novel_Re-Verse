@@ -132,7 +132,7 @@ async function openScaleDialog(location) {
             .lp-scale-dialog-body .lp-scale-slider-row label { white-space: nowrap; }
             .lp-scale-dialog-body .lp-scale-slider-row input[type="range"] { flex: 1 1 auto; }
             .lp-scale-dialog-body .lp-scale-value { min-width: 46px; text-align: right; font-weight: 700; }
-            .lp-scale-preview { position: relative; width: 100%; max-width: 480px; margin: 0 auto; overflow: hidden; border: 1px solid #444; background: #111; }
+            .lp-scale-preview { position: relative; width: 100%; max-width: 480px; min-height: 280px; margin: 0 auto; overflow: hidden; border: 1px solid #444; background: #111; }
             .lp-scale-preview img { display: block; width: 100%; height: auto; }
             .lp-scale-frame { position: absolute; border: 3px solid #ffd11a; border-radius: 10px; box-shadow: 0 0 0 9999px rgba(0,0,0,.45); pointer-events: auto; box-sizing: border-box; cursor: move; touch-action: none; }
             .lp-scale-frame:active { cursor: grabbing; }
@@ -267,7 +267,14 @@ async function openScaleDialog(location) {
                 document.addEventListener('mouseup', onPointerUp)
             })
         }
-    }, {classes: ["lp-scale-dialog-app"], width: 520}).render(true)
+    // height не "auto": Foundry вычисляет auto-высоту один раз по фактическому content.offsetHeight
+    // сразу при рендере - в этот момент <img> превью ещё не успел загрузиться (height:auto у img,
+    // асинхронная загрузка), .lp-scale-preview (position:relative, высоту которому даёт только img -
+    // .lp-scale-frame внутри position:absolute и в высоту не идёт) на тот момент схлопнут в 0px,
+    // и итоговое окно рендерится слишком коротким (~153px вместо нужных ~335px), кнопка Confirm
+    // уезжает за пределы видимой области без какого-либо намёка на прокрутку. min-height на превью
+    // (см. <style> выше) и фиксированная высота здесь вместе гарантируют место под контент сразу.
+    }, {classes: ["lp-scale-dialog-app"], width: 520, height: 480}).render(true)
 }
 
 const deleteButtonListener = async (event) => {

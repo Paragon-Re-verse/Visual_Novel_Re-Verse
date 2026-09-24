@@ -1,4 +1,4 @@
-<div id="vn-bars" class="vn-bars-container">
+<div id="vn-bars" class="vn-bars-container {{barsClass}}">
     {{#each bars}}
         <div class="vn-bar" data-bar-id="{{this.id}}" data-bar-mode="{{this.mode}}" style="left: {{this.offsetX}}%; top: {{this.offsetY}}%; scale: {{this.scale}}%; --vn-bar-speed: {{../barChangeSpeed}}s;">
             {{#if this.name}}<span class="vn-bar-name">{{this.name}}</span>{{/if}}
