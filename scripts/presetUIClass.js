@@ -71,20 +71,26 @@ export class PresetUIClass {
     }
 
     static newBar(data = {}) {
+        // Ступенчатое смещение дефолтной позиции по количеству уже существующих bar в пресете
+        // (index, передаётся из addBar) - без него каждый новый bar появлялся ровно в той же
+        // точке 35%/15%, что и предыдущие, и визуально прятался под ними целиком, пока ГМ не
+        // разведёт их вручную через Detailed mode. Зацикливается каждые 6 bar, чтобы не уехать
+        // за пределы экрана при большом количестве.
+        const index = (data.index ?? 0) % 6
         return {
             id: data.id || foundry.utils.randomID(),
             // left/top в %, та же плоская конвенция позиционирования, что у headerSlider (не center-relative) -
             // так detailed mode переиспользует ровно ту же математику мувера, что у header/left/right слайдеров,
             // без отдельного множителя. Дефолт - примерно верхний центр экрана, не сразу за верхним краем.
-            offsetX: data.offsetX ?? 35,
-            offsetY: data.offsetY ?? 15,
+            offsetX: data.offsetX ?? (35 + index * 5),
+            offsetY: data.offsetY ?? (15 + index * 4),
             scale: data.scale ?? 100,
         }
     }
 
     static async addBar(presetId) {
         const preset = PresetUIClass.getPreset(presetId)
-        const bar = PresetUIClass.newBar()
+        const bar = PresetUIClass.newBar({index: preset.bars.length})
         await PresetUIClass.updatePreset(presetId, {bars: [...preset.bars, bar]})
         return bar.id
     }

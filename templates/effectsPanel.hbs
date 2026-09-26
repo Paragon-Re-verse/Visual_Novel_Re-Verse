@@ -68,14 +68,16 @@
                 {{#each bars}}
                     <div class="vn-fx-bar-row" data-bar-id="{{this.id}}">
                         <div class="vn-fx-bar-row-top flexrow">
-                            <input type="text" data-key="name" value="{{this.name}}" placeholder="{{localize "visual-novel-reverse.effectsPanel.barNamePlaceholder"}}">
+                            <button type="button" class="vn-fx-bar-visibility-toggle {{#if this.visible}}vn-fx-active{{/if}}" data-tooltip="{{localize "visual-novel-reverse.effectsPanel.barVisibilityToggle"}}"><i class="fas {{#if this.visible}}fa-eye{{else}}fa-eye-slash{{/if}}"></i></button>
                             <input type="color" data-key="color" value="{{this.color}}" data-tooltip="{{localize "visual-novel-reverse.effectsPanel.barColorLabel"}}" title="{{localize "visual-novel-reverse.effectsPanel.barColorLabel"}}">
-                            <select data-key="mode" data-tooltip="{{localize "visual-novel-reverse.effectsPanel.barModeHint"}}">
+                            <select data-key="mode">
                                 <option value="counter" {{#unless this.isTimer}}selected{{/unless}}>{{localize "visual-novel-reverse.effectsPanel.barModeCounter"}}</option>
                                 <option value="timer" {{#if this.isTimer}}selected{{/if}}>{{localize "visual-novel-reverse.effectsPanel.barModeTimer"}}</option>
                             </select>
                         </div>
-                        <p class="vn-fx-bar-mode-hint">{{localize "visual-novel-reverse.effectsPanel.barModeHint"}}</p>
+                        <div class="vn-fx-bar-row-name flexrow">
+                            <input type="text" data-key="name" value="{{this.name}}" placeholder="{{localize "visual-novel-reverse.effectsPanel.barNamePlaceholder"}}">
+                        </div>
                         {{#if this.isTimer}}
                             <div class="vn-fx-bar-row-bottom flexrow">
                                 <input type="number" class="vn-fx-bar-timer-part" data-key="timerH" min="0" max="99" value="{{this.timerH}}">:
@@ -85,7 +87,7 @@
                             </div>
                         {{else}}
                             <div class="vn-fx-bar-row-bottom flexrow">
-                                <input type="range" min="0" max="100" step="1" data-key="value" value="{{this.value}}">
+                                <input type="range" class="vn-fx-bar-value-slider" min="0" max="100" step="1" data-key="value" value="{{this.value}}">
                                 <span class="vn-fx-bar-value-readout">{{this.value}}%</span>
                             </div>
                         {{/if}}

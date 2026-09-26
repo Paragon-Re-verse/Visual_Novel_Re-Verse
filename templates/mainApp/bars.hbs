@@ -1,6 +1,6 @@
 <div id="vn-bars" class="vn-bars-container {{barsClass}}">
     {{#each bars}}
-        <div class="vn-bar" data-bar-id="{{this.id}}" data-bar-mode="{{this.mode}}" style="left: {{this.offsetX}}%; top: {{this.offsetY}}%; scale: {{this.scale}}%; --vn-bar-speed: {{../barChangeSpeed}}s;">
+        <div class="vn-bar {{this.barVisibleClass}}" data-bar-id="{{this.id}}" data-bar-mode="{{this.mode}}" style="left: {{this.offsetX}}%; top: {{this.offsetY}}%; scale: {{this.scale}}%; --vn-bar-speed: {{../barChangeSpeed}}s;">
             {{#if this.name}}<span class="vn-bar-name">{{this.name}}</span>{{/if}}
             <div class="vn-bar-track">
                 <div class="vn-bar-fill" style="width: {{this.displayValue}}%; background-color: {{this.color}};"></div>

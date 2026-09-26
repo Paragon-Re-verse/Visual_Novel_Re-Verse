@@ -308,15 +308,18 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
                 const barsContent = settingData.barsData || []
                 const bars = barsLayout.reduce((acc, layout) => {
                     const barContent = barsContent.find(b => b.id === layout.id)
-                    // Bar скрыт, пока ГМ ни разу не поменял его значение в панели "Эффекты"
-                    // (нет записи в barsData) - если только не включено "Всегда показывать bar"
-                    // либо ГМ сейчас в Detailed mode (см. выше)
+                    // Bar НЕ получает DOM-узел вообще, пока ГМ ни разу не поменял его значение в
+                    // панели "Эффекты" (нет записи в barsData) - если только не включено "Всегда
+                    // показывать bar" либо ГМ сейчас в Detailed mode (см. выше). Это структурное
+                    // условие (создаётся ли узел .vn-bar), отдельно от того, ВИДЕН ли он игрокам
+                    // визуально прямо сейчас - см. barVisibleClass/_isBarVisible ниже.
                     if (!barContent && !barsAlwaysShow && !inDetailedMode) return acc
                     const merged = barContent || { id: layout.id, name: "", color: "#a33636", value: 0, mode: "counter" }
                     const displayValue = (merged.mode == "timer" && merged.timerEndTimestamp)
                         ? Math.max(0, Math.min(100, ((merged.timerEndTimestamp - Date.now()) / (merged.timerDurationSeconds * 1000)) * 100))
                         : Math.max(0, Math.min(100, Number(merged.value) || 0))
-                    acc.push({ ...layout, ...merged, displayValue })
+                    const barVisibleClass = _isBarVisible(merged, barsAlwaysShow, inDetailedMode) ? "vn-shown" : "vn-hidden"
+                    acc.push({ ...layout, ...merged, displayValue, barVisibleClass })
                     return acc
                 }, [])
                 context = { ...context, bars, barChangeSpeed: game.settings.get(C.ID, "barChangeSpeed"),
@@ -564,6 +567,7 @@ export class VisualNovelDialogues extends HandlebarsApplicationMixin(Application
         // ниже по файлу вызывает эту функцию напрямую на уже существующем узле.
         _applyBackgroundVisualEffects()
         _applyBarVisualState()
+        _reattachDetailModeMovers()
     }
 
     // DragDrop
@@ -1780,6 +1784,23 @@ function _applyBackgroundVisualEffects() {
     bgImgEl.style.filter = blurOn ? `blur(${(blurStrength * MAX_BLUR_PX).toFixed(2)}px)` : ""
 }
 
+// Видим ли bar ИГРОКАМ прямо сейчас (в Detailed mode ГМ всегда видит все структурно существующие
+// bar отдельно, см. вызовы ниже) - независимо от структурного факта наличия записи в barsData.
+// Способов стать видимым несколько, любой достаточен:
+// - "Всегда показывать bar" (глобальная настройка barsAlwaysShow);
+// - персональный переключатель-"глаз" у конкретного bar (content.visible, панель "Эффекты");
+// - запущенный таймер, пока не истёк (иначе отсчёт тикал бы невидимо для игроков - бессмысленно);
+// - временное 10-секундное превью после любого редактирования полей bar в панели "Эффекты"
+//   (content.previewUntil) - чтобы ГМ сразу видел результат правки, даже если bar иначе скрыт.
+function _isBarVisible(content, barsAlwaysShow, inDetailedMode) {
+    if (barsAlwaysShow || inDetailedMode) return true
+    if (!content) return false
+    if (content.visible) return true
+    if (content.mode === "timer" && content.timerEndTimestamp && content.timerEndTimestamp > Date.now()) return true
+    if (content.previewUntil && content.previewUntil > Date.now()) return true
+    return false
+}
+
 // Применяет к УЖЕ СУЩЕСТВУЮЩИМ .vn-bar узлам новое значение/цвет/название, читая их из vnData.barsData -
 // без Handlebars-рендера части "bars", тем же приёмом, что и _applyBackgroundVisualEffects() выше
 // (иначе CSS transition заполнения не анимируется на только что пересозданном узле). Если для bar ещё
@@ -1836,27 +1857,78 @@ function _applyBarVisualState() {
         } else if (nameEl) {
             nameEl.remove()
         }
+        const visible = _isBarVisible(content, barsAlwaysShow, inDetailedMode)
+        barEl.classList.toggle("vn-shown", visible)
+        barEl.classList.toggle("vn-hidden", !visible)
     })
 }
 
-// Тик таймерных bar (режим "Таймер" - ГМ задаёт ЧЧ:ММ:СС в панели "Эффекты", main.js хранит только
-// абсолютную метку окончания timerEndTimestamp в vnData.barsData, см. apps/effectsPanel.js). Каждый
-// клиент раз в секунду локально пересчитывает % из этой метки и применяет к уже существующему узлу -
-// без записи в settings на каждый тик (дорого и не нужно - у всех клиентов и так одна и та же метка
-// окончания, локальный пересчёт синхронен без какого-либо сетевого обмена). Единственный интервал на
-// весь модуль, не завязан на открытие/закрытие VN-окна - безопасно ничего не делает (querySelectorAll
-// вернёт пустой список), пока в DOM нет ни одного bar в режиме "timer".
+// Муверы Detailed mode (header/left/right слайдеров и каждого bar) вставляются вручную прямо в
+// DOM - см. detailModeChanges() в apps/visualSettingsMenu.js. Это разовая, императивная вставка в
+// момент включения Detailed mode: она не переживает ни один последующий ре-рендер части, в узел
+// которой мувер вложен (headerSlider для #vn-header, "bars" для .vn-bar) - Handlebars-рендер
+// пересоздаёт содержимое узла без мувера внутри. Раньше это не было заметно для header/left/right:
+// detailModeChanges() запрашивала такой ре-рендер только через quickSettingsUpdate({editMode:
+// false}, {renderData: {...}}), а если editMode уже был false (обычное состояние), вызов не менял
+// vnData ни на бит - и game.settings.set в Foundry в этом случае не вызывает хук updateSetting
+// вовсе, так что запрошенный ре-рендер молча пропускался, случайно оставляя уже вставленные муверы
+// нетронутыми. Для bar это было наоборот вредно: у ни разу не показанного bar ещё не было .vn-bar
+// узла, ре-рендер был необходим, чтобы его создать, но тот же пропуск хука не давал этому
+// случиться, и мувер было некуда вставлять. detailModeChanges() теперь всегда явно запрашивает этот
+// ре-рендер (см. правку там же) - что чинит появление bar, но взамен каждый раз честно пересоздаёт
+// #vn-header и вайпает только что вставленный в него мувер. Чинится тем же приёмом, что и
+// _applyBackgroundVisualEffects()/_applyBarVisualState() выше - самовосстановление на каждом
+// _onRender(), а не полагание на один конкретный вызывающий путь.
+function _reattachDetailModeMovers() {
+    if (!game.settings.get(C.ID, "viewMode")) return
+    if (game.settings.get(C.ID, "detailModeBuffer").mode !== "moveSliders") return
+    ["left", "right", "header"].forEach(side => {
+        if (document.getElementById(`vsm-mover-${side}`)) return
+        const sliderEl = document.getElementById(`vn-${side}`)
+        if (!sliderEl) return
+        sliderEl.appendChild(VisualSettingsMenu._getMoverEl(side))
+    })
+    PresetUIClass.getActivePreset().bars.forEach(bar => {
+        if (document.getElementById(`vsm-mover-bar-${bar.id}`)) return
+        const barEl = document.querySelector(`.vn-bar[data-bar-id="${bar.id}"]`)
+        if (!barEl) return
+        const barMover = VisualSettingsMenu._getBarMoverEl(bar.id)
+        if (barMover) barEl.parentElement.appendChild(barMover)
+    })
+}
+
+// Тик bar раз в секунду - две независимые задачи разом:
+// 1. Таймерные bar (режим "Таймер" - ГМ задаёт ЧЧ:ММ:СС в панели "Эффекты", main.js хранит только
+//    абсолютную метку окончания timerEndTimestamp в vnData.barsData, см. apps/effectsPanel.js).
+//    Каждый клиент локально пересчитывает % из этой метки и применяет к уже существующему узлу -
+//    без записи в settings на каждый тик (дорого и не нужно - у всех клиентов и так одна и та же
+//    метка окончания, локальный пересчёт синхронен без какого-либо сетевого обмена).
+// 2. Видимость bar (_isBarVisible) - истечение 10-секундного превью после правки в панели "Эффекты"
+//    само по себе не вызывает никакого settings-обновления (превью явно устроено как "тихое" -
+//    было бы расточительно писать в settings на каждую секунду простоя), поэтому единственный
+//    способ узнать, что окно истекло - переспросить Date.now() здесь. Заодно чинит и "Всегда
+//    показывать bar" не срабатывающее сразу для уже структурно существующих bar - переключатель
+//    подхватывается всеми ими в течение секунды после переключения, без отдельного триггера.
+// Единственный интервал на весь модуль, не завязан на открытие/закрытие VN-окна - безопасно ничего
+// не делает (querySelectorAll вернёт пустой список), пока в DOM нет ни одного bar.
 setInterval(() => {
-    const timerBarEls = document.querySelectorAll('.vn-bar[data-bar-mode="timer"]')
-    if (!timerBarEls.length) return
+    const barEls = document.querySelectorAll('.vn-bar[data-bar-id]')
+    if (!barEls.length) return
     const settingData = getSettings()
     const barsContent = settingData.barsData || []
-    timerBarEls.forEach(barEl => {
+    const barsAlwaysShow = game.settings.get(C.ID, "barsAlwaysShow")
+    const inDetailedMode = game.settings.get(C.ID, "viewMode")
+    barEls.forEach(barEl => {
         const content = barsContent.find(b => b.id === barEl.dataset.barId)
-        if (!content || content.mode !== "timer" || !content.timerEndTimestamp) return
-        const pct = Math.max(0, Math.min(100, ((content.timerEndTimestamp - Date.now()) / (content.timerDurationSeconds * 1000)) * 100))
-        const fillEl = barEl.querySelector(".vn-bar-fill")
-        if (fillEl) fillEl.style.width = `${pct}%`
+        if (!content) return
+        if (content.mode === "timer" && content.timerEndTimestamp) {
+            const pct = Math.max(0, Math.min(100, ((content.timerEndTimestamp - Date.now()) / (content.timerDurationSeconds * 1000)) * 100))
+            const fillEl = barEl.querySelector(".vn-bar-fill")
+            if (fillEl) fillEl.style.width = `${pct}%`
+        }
+        const visible = _isBarVisible(content, barsAlwaysShow, inDetailedMode)
+        barEl.classList.toggle("vn-shown", visible)
+        barEl.classList.toggle("vn-hidden", !visible)
     })
 }, 1000)
 
@@ -2153,6 +2225,15 @@ Hooks.on("updateSetting", async (setting, value, diff, userId) => {
     // редактирования presetsUI в обход UI модуля.
     if (setting.key == `${C.ID}.presetsUI`) {
         _applyBarVisualState()
+    }
+
+    // "Всегда показывать bar" - переключатель, отдельная настройка (не часть vnData/presetsUI),
+    // поэтому не проходит через ветки выше вообще. Bar без единой записи в barsData ещё не имеет
+    // DOM-узла (.vn-bar) - тиковый setInterval ниже по файлу умеет только переключать видимость
+    // уже СУЩЕСТВУЮЩИХ узлов, создать новый не может. Явный структурный ре-рендер части "bars" тут
+    // обязателен, иначе включение "Всегда показывать" не покажет ни один bar без данных.
+    if (setting.key == `${C.ID}.barsAlwaysShow` && VisualNovelDialogues.instance) {
+        VisualNovelDialogues._render(["bars"])
     }
 
     // Переключаем синхронизацию в Advanced Requests -> переключаем её и в VN

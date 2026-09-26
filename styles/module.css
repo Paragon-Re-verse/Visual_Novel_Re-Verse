@@ -578,6 +578,16 @@ i.vn-request-icon {
   box-shadow: inset 8px 8px 6px 1px rgba(171, 171, 171, 0.3411764706), inset 2px 2px 4px 0px rgba(225, 225, 225, 0.5607843137), inset 0px 0px 40px 20px rgba(225, 225, 225, 0.1294117647);
 }
 
+/* .vn-pField-left/-right выше сами ставят pointer-events: all - той же специфичности (один
+   класс), что и общее правило .vn-hidden { pointer-events: none }, поэтому оно побеждало по
+   порядку объявления в файле. Скрытое (opacity: 0) поле оставалось полностью кликабельным
+   (133x280px в среднем окне) и перехватывало клики/перетаскивание у всего, что оказалось под
+   ним - например у мувера bar в Detailed mode. .vn-pField.vn-hidden - два класса, специфичность
+   выше обоих правил выше, побеждает независимо от порядка объявления. */
+.vn-pField.vn-hidden {
+  pointer-events: none;
+}
+
 .vn-portrait {
   width: -moz-max-content;
   width: max-content;
@@ -2914,6 +2924,13 @@ h3.vn-ew-title {
 }
 
 .vsm-mover-container {
+  /* flexrow (Foundry-утилита) включает flex-wrap: wrap по умолчанию. У .vsm-mover (родитель,
+     display: grid) ширина колонки авто-считается по содержимому, и для wrap-контейнера min-content
+     вклад в этот расчёт - это ширина только САМОГО ШИРОКОГО одного ребёнка, а не сумма всех. Из-за
+     этого колонка получалась слишком узкой для 4 детей у бар-мувера (reset+X/Y+grab+delete) - иконки
+     grab/delete переносились на вторую "строку" и наезжали на .vsm-mover-scale-container под ними.
+     У мувера слайдеров (3 ребёнка - без delete) случайно хватало места, поэтому там не проявлялось. */
+  flex-wrap: nowrap;
   border-bottom: 2px outset #434343;
   border-radius: 5px;
   background-color: #53565d;
@@ -4084,38 +4101,21 @@ select[name=hostUserId] option {
 
 /* ===== Горизонтальные шкалы (bar): UI customization, detailed mode, панель "Эффекты", VN-окно ===== */
 
-.vsm-add-bar-button {
-  display: grid;
-  grid-auto-flow: column;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 5px;
-  background-color: #53565d;
-  border-bottom: 2px outset #434343;
-  cursor: pointer;
-  font-weight: 700;
-  color: aliceblue;
-}
-.vsm-add-bar-button:hover {
-  text-shadow: 0 0 4px #df9446;
-}
+/* Кнопка "Add a bar" отсюда убрана - была неисправимо растянута в этом flex-ряду, добавление bar
+   теперь только через рабочую кнопку "+ Add bar" в панели "Эффекты" (.vn-fx-bar-add-button). */
 
 .vsm-bar-preview {
+  /* Превью раскладки bar в UI customization - пунктирная рамка без сплошной заливки, тем же
+     приёмом, что и остальные placeholder-элементы этого мокапа (.vsm-UI, .vsm-text-container) -
+     сплошной красный прямоугольник визуально выбивался на фоне пергаментной пунктирной стилистики. */
   position: absolute;
   width: 20%;
   height: 14px;
-  border: 2px solid #782e22;
+  border: 2px dashed #782e22;
   border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: transparent;
   transform: translate(-50%, 0%);
   pointer-events: none;
-}
-.vsm-bar-preview-fill {
-  width: 60%;
-  height: 100%;
-  background-color: #a33636;
-  border-radius: 2px;
 }
 
 .vsm-mover-delete {
@@ -4146,6 +4146,9 @@ select[name=hostUserId] option {
   gap: 2px;
   width: 220px;
   pointer-events: none;
+  /* Плавное появление/исчезновение (превью-режим правки, истечение 10с, переключатель "глаза") -
+     та же скорость, что и у заполнения шкалы, чтобы оба перехода ощущались единым движением. */
+  transition: opacity var(--vn-bar-speed, 0.6s) ease;
 }
 .vn-bar-name {
   font-weight: 700;
@@ -4203,12 +4206,6 @@ select[name=hostUserId] option {
   background-color: #6b2a20;
   text-shadow: 0 0 4px #df9446;
 }
-.vn-fx-bar-mode-hint {
-  font-size: 85%;
-  opacity: 0.75;
-  font-style: italic;
-  margin: 2px 0 6px 0;
-}
 .vn-fx-bar-row {
   border: 1px solid #542018;
   border-radius: 5px;
@@ -4218,10 +4215,36 @@ select[name=hostUserId] option {
 .vn-fx-bar-row-top {
   gap: 4px;
   align-items: center;
+  /* Тот же баг, что чинили у .vsm-mover-container (flex-wrap: wrap по умолчанию у flexrow +
+     4 ребёнка, включая новую кнопку-"глаз", вместо прежних 3, могли не влезть и перенестись). */
+  flex-wrap: nowrap;
 }
-.vn-fx-bar-row-top input[type="text"] {
-  flex: 1;
-  min-width: 0;
+.vn-fx-bar-row-name {
+  margin-top: 4px;
+}
+.vn-fx-bar-row-name input[type="text"] {
+  width: 100%;
+}
+.vn-fx-bar-visibility-toggle {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 5px;
+  background-color: #53565d;
+  border: 1px solid #363636;
+  color: #9a9a9a;
+  cursor: pointer;
+}
+.vn-fx-bar-visibility-toggle:hover {
+  text-shadow: 0 0 4px #df9446;
+}
+.vn-fx-bar-visibility-toggle.vn-fx-active {
+  background-color: #542018;
+  border-color: #782e22;
+  color: aliceblue;
 }
 .vn-fx-bar-row-bottom {
   gap: 4px;
@@ -4231,6 +4254,10 @@ select[name=hostUserId] option {
 .vn-fx-bar-timer-part {
   width: 42px;
   text-align: center;
+}
+.vn-fx-bar-value-slider {
+  flex: 1;
+  min-width: 0;
 }
 .vn-fx-bar-value-readout {
   min-width: 36px;

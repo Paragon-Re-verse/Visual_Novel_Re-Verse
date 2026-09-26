@@ -66,6 +66,9 @@ export class EffectsPanel extends FormApplication {
                 timerH: Math.floor(totalSeconds / 3600),
                 timerM: Math.floor((totalSeconds % 3600) / 60),
                 timerS: totalSeconds % 60,
+                // Постоянный переключатель-"глаз" (см. activateListeners ниже) - независим от
+                // "Всегда показывать bar" (глобальная настройка) и от 10-секундного превью правки.
+                visible: !!content.visible,
             }
         })
     }
@@ -201,18 +204,37 @@ export class EffectsPanel extends FormApplication {
             // есть - только значение/цвет меняются на уже существующем узле (see main.js
             // _applyBarVisualState, вызывается из Hooks.on("updateSetting", ...) без renderParts,
             // чтобы CSS transition плавно анимировал изменение, а не дёргался пересозданным узлом).
-            const upsertBar = async (patch) => {
+            //
+            // preview (по умолчанию true) - любая правка поля даёт bar 10-секундное окно видимости
+            // (previewUntil), даже если он иначе скрыт (см. main.js _isBarVisible) - ГМ сразу видит
+            // результат своей правки. Окно истекает само по себе (тиковый setInterval в main.js),
+            // без отдельной записи в settings на истечение. Переключатель-"глаз" - единственное
+            // исключение (preview: false) - это осознанный постоянный выбор ГМа, а не мимолётная
+            // правка, ему не нужно (и не должно) авто-скрываться через 10 секунд.
+            const upsertBar = async (patch, { preview = true } = {}) => {
                 const settingData = getSettings()
                 const barsData = foundry.utils.deepClone(settingData.barsData || [])
                 let bar = barsData.find(b => b.id === barId)
                 const isNew = !bar
                 if (!bar) {
-                    bar = { id: barId, name: "", color: "#a33636", value: 0, mode: "counter", timerDurationSeconds: 0, timerEndTimestamp: null }
+                    bar = { id: barId, name: "", color: "#a33636", value: 0, mode: "counter", timerDurationSeconds: 0, timerEndTimestamp: null, visible: false, previewUntil: null }
                     barsData.push(bar)
                 }
                 Object.assign(bar, patch)
+                if (preview) bar.previewUntil = Date.now() + 10000
                 await quickSettingsUpdate({ barsData }, isNew ? { renderData: { renderParts: ["bars"] } } : {})
             }
+
+            // Постоянный переключатель видимости ("глаз", тот же паттерн, что в самом Foundry) -
+            // в отличие от превью выше, не истекает сам по себе, и не зависит от того, тронуто ли
+            // поле значения/цвета/имени.
+            const visibilityToggle = rowEl.querySelector('.vn-fx-bar-visibility-toggle')
+            visibilityToggle?.addEventListener('click', async () => {
+                const settingData = getSettings()
+                const current = (settingData.barsData || []).find(b => b.id === barId)
+                await upsertBar({ visible: !current?.visible }, { preview: false })
+                this.render()
+            })
 
             rowEl.querySelector('[data-key="name"]')?.addEventListener('change', (event) => {
                 upsertBar({ name: event.currentTarget.value })

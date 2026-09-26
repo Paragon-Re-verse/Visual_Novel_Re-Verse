@@ -127,7 +127,7 @@
             "barChangeSpeed": "Bar fill change speed",
             "barChangeSpeedHint": "Duration of the smooth fill animation when a bar's value changes (Effects panel), in seconds",
             "barsAlwaysShow": "Always show bars",
-            "barsAlwaysShowHint": "If enabled, every bar added in UI customization is shown immediately. If disabled, a bar stays hidden until the GM changes its value for the first time in the Effects panel"
+            "barsAlwaysShowHint": "If enabled, every bar is shown permanently. If disabled, a bar is hidden unless its own eye toggle (Effects panel) is on, it's a running timer, or it was edited in the last 10 seconds"
         },
         "toolbar": {
             "openVN": "Open Visual Novel window",
@@ -428,7 +428,6 @@
                 "exit": "Return",
                 "noneWIP": "< WIP >"
             },
-            "addBarTooltip": "Add a bar",
             "deleteBarTooltip": "Delete bar",
             "addBarLabel": "Add bar"
         },
@@ -703,7 +702,7 @@
             "barTimerStart": "Start",
             "noBarsHint": "No bars in the current UI preset yet. Add one from the \"UI customization\" tile in the Visual Settings Menu.",
             "barColorLabel": "Color",
-            "barModeHint": "Counter: you set the value directly (0-100%). Timer: you set a duration (HH:MM:SS) and the bar counts down on its own."
+            "barVisibilityToggle": "Show/hide this bar to players (permanent, independent of \"Always show bar\")"
         },
         "dataActions": {
             "hideVN": "Toggle the Visual Novel window display",
