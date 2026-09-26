@@ -303,17 +303,6 @@ export class VisualSettingsMenu extends FormApplication {
                 })
             })
 
-            // Добавить bar (горизонтальную шкалу) - только раскладка (позиция по умолчанию,
-            // без перемещения/ресайза). Перемещение и ресайз - в detailed mode.
-            html[0].querySelector('.vsm-add-bar-button')?.addEventListener('click', async (event) => {
-                if (!this.editablePreset) {
-                    ui.notifications.warn(game.i18n.localize(`${C.ID}.visualSettingsMenu.noPresetToSaveError`))
-                    return
-                }
-                await PresetUIClass.addBar(this.editablePreset)
-                this.render()
-            })
-
             // Добавить пресет
             html[0].querySelector('.vsm-add-preset')?.addEventListener('click', async (event) => {
                 const newPresetId = await PresetUIClass.addPreset()
@@ -958,6 +947,9 @@ export class VisualSettingsMenu extends FormApplication {
         });
         
         // Двигаем мышь
+        // Тот же clamp, что и в _getBarMoverEl ниже - без него мувер можно утащить за пределы
+        // окна и потерять доступ к его собственной кнопке "Reset".
+        const clamp = (v) => Math.max(0, Math.min(100, v));
         function onMouseMove(e) {
             if (!isDragging) return;
             const dx = Math.round(((e.clientX - startX) / window.innerWidth) * ({right: -100, header: 143}[side] || 100));
@@ -965,21 +957,25 @@ export class VisualSettingsMenu extends FormApplication {
             const shiftPressed = e.shiftKey;
             if (shiftPressed) {
                 if (Math.abs(dx) > Math.abs(dy)) {
-                    sliderEl.style[sliderSide] = `${(initialX + dx)}%`;
+                    const newX = clamp(initialX + dx);
+                    sliderEl.style[sliderSide] = `${newX}%`;
                     sliderEl.style.top = `${initialY}%`;
-                    spanElX.innerHTML = `X: ${initialX + dx}%`;
+                    spanElX.innerHTML = `X: ${newX}%`;
                     spanElY.innerHTML = `Y: ${initialY}%`;
                 } else {
-                    sliderEl.style.top = `${initialY + dy}%`;
+                    const newY = clamp(initialY + dy);
+                    sliderEl.style.top = `${newY}%`;
                     sliderEl.style[sliderSide] = `${(initialX)}%`;
                     spanElX.innerHTML = `X: ${initialX}%`;
-                    spanElY.innerHTML = `Y: ${initialY + dy}%`;
+                    spanElY.innerHTML = `Y: ${newY}%`;
                 }
             } else {
-                sliderEl.style.top = `${initialY + dy}%`;
-                sliderEl.style[sliderSide] = `${(initialX + dx)}%`;
-                spanElX.innerHTML = `X: ${initialX + dx}%`;
-                spanElY.innerHTML = `Y: ${initialY + dy}%`;
+                const newX = clamp(initialX + dx);
+                const newY = clamp(initialY + dy);
+                sliderEl.style.top = `${newY}%`;
+                sliderEl.style[sliderSide] = `${newX}%`;
+                spanElX.innerHTML = `X: ${newX}%`;
+                spanElY.innerHTML = `Y: ${newY}%`;
             }
         }
 
@@ -1022,7 +1018,28 @@ export class VisualSettingsMenu extends FormApplication {
         // main.js _preparePartContext "bars"). Без узла двигать нечего - мувер не создаём.
         if (!bar || !barEl) return null
 
-        moverBody.style.transform = `translate(-50%, 0%) scale(${100 / bar.scale})`;
+        // Мувер НЕ вкладывается внутрь .vn-bar (в отличие от версии до этой правки) - вставляется
+        // рядом с ним, в того же родителя (#vn-bars, см. detailModeChanges/_reattachDetailModeMovers).
+        // Раньше, будучи дочерним узлом .vn-bar, мувер наследовал его CSS scale (bar можно растянуть
+        // на 50-300%) и компенсировал это обратным scale(100/bar.scale) на себе самом - при смене
+        // масштаба это давало заметный прыжок позиции мувера (составной transform родителя и ребёнка
+        // с разными transform-origin не сокращался чисто в размер, а ещё и сдвигал панель).
+        moverBody.style.transform = `translate(-50%, 0%)`;
+        // По горизонтали мувер центрируется над тем же offsetX%, что и bar - высота bar на это не
+        // влияет. По вертикали панель ставится НИЖЕ bar (не выше - иначе у bar, размещённого близко
+        // к верхнему краю экрана, панель редактирования уезжает за пределы видимой области, см.
+        // скриншот в отчёте о багах), с отступом от РЕАЛЬНОГО нижнего края bar на экране - его высота
+        // зависит от scale (50-300%) и наличия имени, поэтому считается через getBoundingClientRect(),
+        // а не через фиксированный отступ в px/% (не совпал бы с реальным краем на большом scale).
+        const syncMoverPosition = () => {
+            moverBody.style.left = `${parseFloat(barEl.style.left) || 0}%`;
+            const parentRect = barEl.parentElement.getBoundingClientRect();
+            const barRect = barEl.getBoundingClientRect();
+            const gapPx = 10;
+            const topPercent = ((barRect.bottom - parentRect.top + gapPx) / parentRect.height) * 100;
+            moverBody.style.top = `${topPercent}%`;
+        };
+        syncMoverPosition();
 
         moverBody.innerHTML = `
             <div class="vsm-mover-container flexrow">
@@ -1047,6 +1064,7 @@ export class VisualSettingsMenu extends FormApplication {
             barEl.style.left = `${defBar.offsetX}%`
             barEl.style.top = `${defBar.offsetY}%`
             barEl.style.scale = 1
+            syncMoverPosition();
 
             const spanElX = moverBody.querySelector('.vsm-mover-X');
             const spanElY = moverBody.querySelector('.vsm-mover-Y');
@@ -1054,9 +1072,6 @@ export class VisualSettingsMenu extends FormApplication {
             spanElX.innerHTML = `X: ${defBar.offsetX}%`;
             spanElY.innerHTML = `Y: ${defBar.offsetY}%`;
             scaleEl.innerHTML = `${game.i18n.localize(`${C.ID}.visualSettingsMenu.scale`)}: ${defBar.scale}%`;
-
-            moverBody.style.transform = `translate(-50%, 0%)`;
-            moverBody.style.scale = 1;
             moverBody.querySelector('input').value = defBar.scale;
 
             document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
@@ -1083,6 +1098,14 @@ export class VisualSettingsMenu extends FormApplication {
             document.addEventListener('mouseup', onMouseUp);
         });
 
+        // Без clamp offsetX/offsetY уходили в отрицательные значения (или за 100%) при резком/
+        // длинном перетаскивании - bar и весь его мувер (включая кнопку "Reset") улетали за
+        // пределы окна и становились некликабельными, единственный способ вернуть bar был -
+        // редактирование presetsUI напрямую через консоль.
+        const clamp = (v) => Math.max(0, Math.min(100, v));
+
+        // Мувер больше не вложен в .vn-bar (см. комментарий в начале функции) - его позицию
+        // пересчитываем через syncMoverPosition() при каждом обновлении позиции bar.
         function onMouseMove(e) {
             if (!isDragging) return;
             const dx = Math.round(((e.clientX - startX) / window.innerWidth) * 100);
@@ -1090,21 +1113,28 @@ export class VisualSettingsMenu extends FormApplication {
             const shiftPressed = e.shiftKey;
             if (shiftPressed) {
                 if (Math.abs(dx) > Math.abs(dy)) {
-                    barEl.style.left = `${(initialX + dx)}%`;
+                    const newX = clamp(initialX + dx);
+                    barEl.style.left = `${newX}%`;
                     barEl.style.top = `${initialY}%`;
-                    spanElX.innerHTML = `X: ${initialX + dx}%`;
+                    syncMoverPosition();
+                    spanElX.innerHTML = `X: ${newX}%`;
                     spanElY.innerHTML = `Y: ${initialY}%`;
                 } else {
-                    barEl.style.top = `${initialY + dy}%`;
+                    const newY = clamp(initialY + dy);
+                    barEl.style.top = `${newY}%`;
                     barEl.style.left = `${(initialX)}%`;
+                    syncMoverPosition();
                     spanElX.innerHTML = `X: ${initialX}%`;
-                    spanElY.innerHTML = `Y: ${initialY + dy}%`;
+                    spanElY.innerHTML = `Y: ${newY}%`;
                 }
             } else {
-                barEl.style.top = `${initialY + dy}%`;
-                barEl.style.left = `${(initialX + dx)}%`;
-                spanElX.innerHTML = `X: ${initialX + dx}%`;
-                spanElY.innerHTML = `Y: ${initialY + dy}%`;
+                const newX = clamp(initialX + dx);
+                const newY = clamp(initialY + dy);
+                barEl.style.top = `${newY}%`;
+                barEl.style.left = `${newX}%`;
+                syncMoverPosition();
+                spanElX.innerHTML = `X: ${newX}%`;
+                spanElY.innerHTML = `Y: ${newY}%`;
             }
         }
 
@@ -1116,10 +1146,13 @@ export class VisualSettingsMenu extends FormApplication {
             document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
         }
 
+        // Мувер больше не вложен в .vn-bar и не наследует его scale (см. комментарий в начале
+        // функции) сам, но его позиция "ниже bar" зависит от реальной высоты bar на экране, а та
+        // меняется вместе со scale - пересчитываем через syncMoverPosition() при каждом изменении.
         moverBody.querySelector('input[name="scale"]').addEventListener('input', function(event) {
             barEl.style.scale = event.currentTarget.value / 100;
             moverBody.querySelector('.vsm-mover-scale').textContent = `${game.i18n.localize(`${C.ID}.visualSettingsMenu.scale`)}: ${event.currentTarget.value}%`;
-            moverBody.style.transform = `translate(-50%, 0%) scale(${100 / event.currentTarget.value})`;
+            syncMoverPosition();
             document.getElementById("vsm-detailUI-save")?.classList?.toggle("vsm-save-pulse", true)
         });
 
@@ -1154,22 +1187,29 @@ export class VisualSettingsMenu extends FormApplication {
             document.getElementById("vn-right").appendChild(VisualSettingsMenu._getMoverEl("right"));
             document.getElementById("vn-header").appendChild(VisualSettingsMenu._getMoverEl("header"));
             // По одному муверу на каждый bar активного пресета, у которого сейчас есть DOM-узел
-            // (bar может быть скрыт - см. barsAlwaysShow). Мувер вставляется ВНУТРЬ самого .vn-bar,
-            // как и у слайдеров (#vn-left/right/header) - так его translate(-50%, 0%) центрируется
-            // ровно над своим bar, а не над всем контейнером #vn-bars.
+            // (bar может быть скрыт - см. barsAlwaysShow). Мувер вставляется РЯДОМ с .vn-bar (в его
+            // родителя #vn-bars), не внутрь - см. комментарий в начале _getBarMoverEl про то, почему
+            // вложенность в масштабируемый .vn-bar раньше давала прыжок позиции при смене scale.
             PresetUIClass.getActivePreset().bars.forEach(bar => {
                 const barMover = VisualSettingsMenu._getBarMoverEl(bar.id)
                 const barEl = document.querySelector(`.vn-bar[data-bar-id="${bar.id}"]`)
-                if (barMover && barEl) barEl.appendChild(barMover)
+                if (barMover && barEl) barEl.parentElement.appendChild(barMover)
             })
         }
 
         await game.settings.set(C.ID, "viewMode", detailMode);
         // "bars" - на входе в Detailed mode показываем все bar независимо от barsAlwaysShow/"тронут
         // ли уже" (иначе нечего хватать мувером), на выходе - актуализируем обратно до обычных
-        // правил видимости (см. main.js _preparePartContext "bars" case, inDetailedMode)
-        if (detailMode) await quickSettingsUpdate({editMode: false}, {renderData: {renderParts: ["editWindow", "foreground", "headerSlider", "bars", ..._portraitPartsKeys()]}})
-        else VisualNovelDialogues._render(["editWindow", "foreground", "headerSlider", "bars", ..._portraitPartsKeys()]);
+        // правил видимости (см. main.js _preparePartContext "bars" case, inDetailedMode).
+        // Рендер запрашиваем ЯВНО через VisualNovelDialogues._render(...) в обоих случаях, а не через
+        // renderData у quickSettingsUpdate - если editMode уже был false (обычное состояние вне
+        // редактирования портретов), {editMode: false} не меняет vnData ни на бит, а game.settings.set
+        // в Foundry не вызывает хук updateSetting для полностью идентичного значения. Из-за этого весь
+        // renderData.renderParts запрос молча терялся вместе с ним, и часть "bars" (а с ней и муверы
+        // только что добавленных, ни разу не показанных bar) не рендерилась вообще при первом входе в
+        // Detailed mode.
+        await quickSettingsUpdate({editMode: false})
+        await VisualNovelDialogues._render(["editWindow", "foreground", "headerSlider", "bars", ..._portraitPartsKeys()]);
     }
 
     // А это тут просто по приколу (просто тронь - и всё развалится)
